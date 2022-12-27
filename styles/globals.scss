@@ -1,8 +1,8 @@
-@use "./partials/addFlex";
+@use "./partials/utils";
 @use "./partials/colors";
 @use "./partials/mediaQuery";
 
-@tailwind base;
+// @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
