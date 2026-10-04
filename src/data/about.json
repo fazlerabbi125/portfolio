@@ -1,0 +1,179 @@
+{
+	"details": "I'm Fazle Rabbi Faiyaz, a software engineer from Bangladesh who is eager to learn about modern technologies and apply them to solve real-world problems. My journey in this field begain in 2017, where I started my BSc in Computer Science and Engineering programme in BRAC University. The coursework and projects I undertook during my studies provided me with a solid foundation in programming, data structures, algorithms, databases, AI, and software development principles. My thesis on secure healthcare data processing deepened my grasp of how dependable systems are put together and confirmed that building reliable software for real use is the work I want to do.\n\tAfter graduating, I transitioned into industry and spent the next 4+ years contributing to various software project. Along the way I took on work beyond writing code, including interviewing candidates and training new engineers. Shipping features taught me a lot, but designing systems that stay reliable as they scale is something I wanted to study properly, so I'm now pursuing an MSc in Software Engineering at the University of Limerick, with a focus on architecture, software quality, and requirements. My longer-term goal is to lead engineering teams and set technical direction.",
+	"skills": {
+		"programmingLanguages": [
+		{
+			"name": "Python",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg"
+		},
+		{
+			"name": "JavaScript",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg"
+		},
+		{
+			"name": "TypeScript",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg"
+		},
+		{
+			"name": "Java",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg"
+		},
+		{
+			"name": "C#",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg"
+		},
+		{
+			"name": "PHP",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg"
+		}
+		],
+		"fullStackDevelopment": [
+			{
+			"name": "PostgreSQL",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg"
+		},
+		{
+			"name": "MySQL",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg"
+		},
+		{
+			"name": "MongoDB",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg"
+		},
+		{
+			"name": "SQLite",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg"
+		},
+		{
+			"name": "Redis",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg"
+		},
+			{
+			"name": "Node.js",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg"
+		},
+		{
+			"name": "Express.js",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg"
+		},
+		{
+			"name": "React.js",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg"
+		},
+		{
+			"name": "Next.js",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg"
+		},
+		{
+			"name": "Django",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg"
+		},
+		{
+			"name": "NestJS",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-original.svg"
+		},
+		{
+			"name": "Odoo",
+			"photo": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Official_Odoo_logo.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
+		},
+		{
+			"name": "FastAPI",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg"
+		},
+		{
+			"name": "Vue.js",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg"
+		},
+		{
+			"name": "Nuxt.js",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nuxtjs/nuxtjs-original.svg"
+		},
+		{
+			"name": "Flask",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg"
+		},
+		{
+			"name": "HTML",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg"
+		},
+		{
+			"name": "CSS",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg"
+		},
+			{
+			"name": "SASS",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg"
+			}
+		],
+		"toolsAndDevOps": [
+			{
+			"name": "Git",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg"
+		},
+		{
+			"name": "GitHub",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg"
+		},
+		{
+			"name": "Visual Studio Code",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg"
+		},
+		{
+			"name": "PyCharm",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pycharm/pycharm-original.svg"
+		},
+		{
+			"name": "Redmine",
+			"photo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXsqawiF6FqzvafwT0XYUD02pvNzZFEA0d2Ll-LtmS7jNAtPG-1frkFpOW&s=10"
+		},
+		{
+			"name": "Clickup",
+			"photo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR01gGQfS1UXpZ8QiRUXV5g1PphBqFP1ZtK99WcWVKOHuQDK4JQecYvBg&s=10"
+		},
+		{
+			"name": "Postman",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg"
+		},
+		{
+			"name": "Docker",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg"
+		},
+		{
+			"name": "Bitbucket",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bitbucket/bitbucket-original.svg"
+		},
+		{
+			"name": "Jira",
+			"photo": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jira/jira-original.svg"
+		}
+	]
+},
+	"certifications": [
+		{
+			"title": "IBM Full Stack Software Developer Professional Certificate",
+			"provider": "IBM via Coursera",
+			"date": "08/2025",
+			"url": "https://coursera.org/verify/professional-cert/51ZL7GN6HUFA",
+			"description": "A comprehensive program covering cloud-native application development, GitHub, Node.js, React, CI/CD, Docker, databases, Flask, Django, application security, microservices, and serverless computing."
+		},
+		{
+			"title": "Python for Everybody Specialization",
+			"provider": "University of Michigan via Coursera",
+			"date": "08/2025",
+			"url": "https://coursera.org/verify/specialization/XBBCGG2CTH8S",
+			"description": "A specialization covering programming fundamentals, data structures, networked application programming interfaces, and databases with Python."
+		},
+		{
+			"title": "IELTS Academic",
+			"provider": "IELTS",
+			"date": "08/2024",
+			"description": "Overall band score: 7.5, with Listening 9, Reading 8, Writing 6, and Speaking 7.5. CEFR level: C1."
+		},
+		{
+			"title": "Fundamental Engineering Training Course in Web Full Stack - MERN",
+			"provider": "BJIT Limited and BJIT Academy",
+			"date": "07/2022",
+			"description": "Employee training focused on full-stack MERN application development, including TypeScript, SASS, and Docker."
+		}
+	]
+}

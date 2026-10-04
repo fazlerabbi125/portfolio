@@ -11,8 +11,7 @@
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2
+    "indentStyle": "tab"
   },
   "css": {
     "parser": {
@@ -22,7 +21,13 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "correctness":{
+        "useExhaustiveDependencies": "warn"
+      }
     },
     "domains": {
       "next": "recommended",

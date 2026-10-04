@@ -1,0 +1,32 @@
+[
+	{
+		"title": "B.Sc. in Computer Science and Engineering (Minor in Business)",
+		"institution": "BRAC University",
+		"location": "Dhaka, Bangladesh",
+		"period": "Jan 2017 – Jun 2021",
+		"details": [
+			"Minor in Business",
+			"Final result: CGPA 3.81 out of 4",
+			"Dean's List & VC's List recipient across multiple undergraduate semesters",
+			"Highest Distinction for completing the degree with a CGPA of 3.80 or higher"
+		],
+		"thesis": {
+			"title": "Blockchain-based edge computing for medical data storage & processing using federated learning",
+			"link": "http://hdl.handle.net/10361/14984"
+		}
+	},
+	{
+		"title": "A-levels (Pearson Edexcel IAL)",
+		"institution": "Academia",
+		"location": "Dhaka, Bangladesh",
+		"period": "2016",
+		"details": ["Final result: 2A, 1B"]
+	},
+	{
+		"title": "O-levels (Pearson Edexcel IGCSE)",
+		"institution": "Academia",
+		"location": "Dhaka, Bangladesh",
+		"period": "2014",
+		"details": ["Final result: 3A*, 4A, 1C"]
+	}
+]

@@ -1,0 +1,30 @@
+[
+	{
+		"role": "Full-stack Developer",
+		"company": "Micronetbd Inc.",
+		"location": "Dhaka, Bangladesh",
+		"website": "https://micronetbd.org",
+		"period": "Nov 2025 – Aug 2026",
+		"startDate": "2025-11",
+		"endDate": "2026-08",
+		"details": [
+			"Built a middleware application bridging Salesforce Marketing Cloud and a messaging platform using Express.js and Nuxt.js.",
+			"Enabled businesses to run marketing campaigns and send up to 10,000 messages per minute."
+		]
+	},
+	{
+		"role": "Software Engineer",
+		"company": "BJIT Limited",
+		"location": "Dhaka, Bangladesh",
+		"website": "https://bjitgroup.com",
+		"period": "Apr 2022 – Oct 2025",
+		"startDate": "2022-04",
+		"endDate": "2025-10",
+		"details": [
+			"Developed the front end of a Japanese media platform using Next.js, enabling over 400 emerging startups to connect with potential investors.",
+			"Migrated and developed modules for the company's latest Odoo ERP system, optimizing accounting, payroll, inventory purchase, recruitment, meal ordering, and leave management for over 500 employees.",
+			"Performed technical interviews and assessments for roughly 100 candidates to recruit software engineers who met company standards.",
+			"Trained 10 software engineer trainees in Python, Django, and Odoo."
+		]
+	}
+]

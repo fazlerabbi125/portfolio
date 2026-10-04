@@ -1,0 +1,61 @@
+[
+	{
+		"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+		"title": "Web development tutorial 1",
+		"description": "A practical introduction to building modern web interfaces.",
+		"duration": "6:58"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=UB1O30fR-EE",
+		"title": "Web development tutorial 2",
+		"description": "Core techniques for developing responsive web applications.",
+		"duration": "8:42"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=PkZNo7MFNFg",
+		"title": "Web development tutorial 3",
+		"description": "A focused lesson on writing clear, maintainable JavaScript.",
+		"duration": "7:31"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=ZxKM3DCV2kE",
+		"title": "Web development tutorial 4",
+		"description": "Explore useful patterns for organizing a front-end project.",
+		"duration": "9:15"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=Ke90Tje7VS0",
+		"title": "Web development tutorial 5",
+		"duration": "5:47"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=mJ3bGvy0WAY",
+		"title": "Web development tutorial 6",
+		"description": "A hands-on look at improving everyday development workflows.",
+		"duration": "10:03"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=Q33KBiDriJY",
+		"title": "Web development tutorial 7",
+		"description": "Build stronger interfaces with accessible interaction patterns.",
+		"duration": "6:24"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=RGOj5yH7evk",
+		"title": "Web development tutorial 8",
+		"description": "A concise guide to keeping components easy to extend.",
+		"duration": "8:08"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+		"title": "Web development tutorial 9",
+		"description": "See how thoughtful structure can simplify complex features.",
+		"duration": "7:56"
+	},
+	{
+		"url": "https://www.youtube.com/watch?v=yfoY53QXEnI",
+		"title": "Web development tutorial 10",
+		"description": "A final walkthrough of practical front-end problem solving.",
+		"duration": "11:12"
+	}
+]

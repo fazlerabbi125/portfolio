@@ -1,0 +1,41 @@
+.page-nav-grid-container {
+    margin: 5rem auto;
+    padding-inline: 1rem;
+    width: 85%;
+    min-width: 300px;
+}
+
+.page-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 400px));
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-nav-card{
+    transition: transform 180ms ease, border-color 180ms ease;
+    aspect-ratio: 3/1.25;
+}
+
+.page-nav-card:hover .portfolio-card,
+.page-nav-card:focus-visible .portfolio-card {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+}
+
+.page-nav-card__icon {
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: 0.25rem;
+    color: var(--primary);
+    stroke-width: 1.75;
+}
+
+.page-nav-card [data-slot="card-title"] {
+    font-size: 1.1rem;
+    font-weight: 650;
+}
+
+.page-nav-card [data-slot="card-description"] {
+    line-height: 1.5;
+}
