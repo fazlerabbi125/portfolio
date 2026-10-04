@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AppLayout from "@/components/common/AppLayout";
-import { SITE } from "@/lib/constants";
+import { Toaster } from "@/components/ui/toast";
 
 // import ThemeSwitcher from "@/components/providers/ThemeSwitcher";
 
@@ -12,7 +12,7 @@ const commonSEOconfig = {
 	siteName: "Fazle Rabbi Faiyaz Portfolio",
 	description:
 		"Portfolio of Fazle Rabbi Faiyaz, a full-stack software developer",
-	image: SITE.photo,
+	image: '/ogp-photo.jpg',
 };
 
 export const metadata: Metadata = {
@@ -51,6 +51,7 @@ export default function RootLayout({
 				{/* <ThemeSwitcher> */}
 				<AppLayout>{children}</AppLayout>
 				{/* </ThemeSwitcher> */}
+				<Toaster />
 			</body>
 		</html>
 	);

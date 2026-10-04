@@ -16,6 +16,11 @@ export const NAVIGATION_LINKS = {
 	contact: { label: "Contact", route: "/contact" },
 } as const satisfies Record<string, { label: string; route: string }>;
 
+export enum USER_ROLES {
+	ADMIN = "admin",
+	USER = "user",
+}
+
 export const PICTURE_GALLERY = [
 	{
 		title: "City light at dusk",

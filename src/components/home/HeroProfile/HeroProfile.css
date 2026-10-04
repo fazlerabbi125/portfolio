@@ -20,7 +20,7 @@
 
 .hero-section__image-container {
 	position: relative;
-	aspect-ratio: 1.1/1;
+	aspect-ratio: 1.1 / 1;
 }
 
 .hero-section__image-container img {

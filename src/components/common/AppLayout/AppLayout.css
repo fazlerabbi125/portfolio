@@ -1,15 +1,15 @@
 .app-layout {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
 
-    @supports(height: 100dvh) {
-        min-height: 100dvh;
-    }
+	@supports (height: 100dvh) {
+		min-height: 100dvh;
+	}
 }
 
 .app-layout__main {
-    flex-grow: 1;
+	flex-grow: 1;
 }
 
 .app-header {
@@ -20,13 +20,13 @@
 	background: var(--surface);
 }
 
-.app-header__inner{
+.app-header__inner {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
 	min-height: 4rem;
-    padding: 0.5rem 2rem;
+	padding: 0.5rem 2rem;
 }
 
 .app-header__actions {
@@ -50,7 +50,7 @@
 	border-top: 1px solid var(--border);
 	color: var(--muted);
 	font-size: 0.9rem;
-    background: var(--surface);
+	background: var(--surface);
 }
 
 .footer__links {

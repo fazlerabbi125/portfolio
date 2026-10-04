@@ -56,9 +56,7 @@ export default function VideoDisplay() {
 					>
 						<Play size={20} data-type="icon" />
 						<span data-type="title">{video.title}</span>
-						<span data-type="duration">
-							Duration: {video.duration}
-						</span>
+						<span data-type="duration">Duration: {video.duration}</span>
 					</Button>
 				))}
 			</section>
