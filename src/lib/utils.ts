@@ -85,6 +85,7 @@ export class API {
 		if (!res.ok) {
 			return Promise.reject({
 				data,
+				ok: res.ok,
 				status: res.status,
 				statusText: res.statusText,
 			});
@@ -92,6 +93,7 @@ export class API {
 
 		return {
 			data: data as T,
+			ok: res.ok,
 			status: res.status,
 			statusText: res.statusText,
 		};

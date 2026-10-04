@@ -13,7 +13,7 @@ import {
 	postSchema,
 } from "@/schemas/blog.schema";
 
-const POSTS_PER_PAGE = 9;
+const POSTS_PER_PAGE = 15;
 
 // ─── Posts ────────────────────────────────────────────────────────────────────
 

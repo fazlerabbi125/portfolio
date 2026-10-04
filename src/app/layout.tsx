@@ -12,19 +12,22 @@ const commonSEOconfig = {
 	siteName: "Fazle Rabbi Faiyaz Portfolio",
 	description:
 		"Portfolio of Fazle Rabbi Faiyaz, a full-stack software developer",
-	image: '/ogp-photo.jpg',
+	image: "/ogp-photo.jpg",
 };
 
+const appURL = process.env.NEXT_PUBLIC_APP_URL
+	? new URL(process.env.NEXT_PUBLIC_APP_URL)
+	: undefined;
+
 export const metadata: Metadata = {
-	metadataBase: process.env.NEXT_PUBLIC_APP_URL
-		? new URL(process.env.NEXT_PUBLIC_APP_URL)
-		: undefined,
+	metadataBase: appURL?.toString(),
 	title: { default: "Faiyaz | Portfolio", template: "%s | Faiyaz" },
 	description: "The portfolio of Fazle Rabbi Faiyaz.",
 	openGraph: {
-		type: "profile",
+		type: "website",
 		siteName: commonSEOconfig.siteName,
 		description: commonSEOconfig.description,
+		url: appURL?.toString(),
 		images: [
 			{
 				url: commonSEOconfig.image,
