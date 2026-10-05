@@ -1,15 +1,41 @@
 "use client";
 
-import { ArrowLeft, Calendar, Edit3, Tag, Trash2 } from "lucide-react";
+import {
+	ArrowLeft,
+	Calendar,
+	Edit3,
+	Heart,
+	Share2,
+	Tag,
+	Trash2,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { deletePost } from "@/actions/blog";
+import { useEffect, useState } from "react";
+import {
+	FacebookIcon,
+	FacebookShareButton,
+	LinkedinIcon,
+	LinkedinShareButton,
+	WhatsappIcon,
+	WhatsappShareButton,
+} from "react-share";
+import { deletePost, toggleFavorite } from "@/actions/blog";
 import DeleteConfirmDialog from "@/components/blog/DeleteConfirmDialog";
 import PostModal from "@/components/blog/PostModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 import { USER_ROLES } from "@/lib/constants";
 import type { SessionData } from "@/lib/session";
 import "./PostList.css";
@@ -36,19 +62,34 @@ interface PostDetailViewProps {
 	post: PostDetail;
 	categories: Category[];
 	currentUser: SessionData | null;
+	shareUrl: string;
+	isFavorited?: boolean;
 }
 
 export default function PostDetailView({
 	post,
 	categories,
 	currentUser,
+	shareUrl,
+	isFavorited = false,
 }: Readonly<PostDetailViewProps>) {
 	const router = useRouter();
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [favorited, setFavorited] = useState(isFavorited);
+	const [resolvedShareUrl, setResolvedShareUrl] = useState(shareUrl);
+
+	useEffect(() => {
+		if (shareUrl.startsWith("http")) {
+			setResolvedShareUrl(shareUrl);
+			return;
+		}
+		setResolvedShareUrl(new URL(shareUrl, window.location.origin).toString());
+	}, [shareUrl]);
 
 	const isAdmin = currentUser?.role === USER_ROLES.ADMIN;
+	const canFavorite = currentUser?.role === USER_ROLES.USER;
 
 	const formattedDate = new Intl.DateTimeFormat("en-US", {
 		weekday: "long",
@@ -70,9 +111,15 @@ export default function PostDetailView({
 		}
 	};
 
+	const handleFavorite = async () => {
+		const result = await toggleFavorite(post.id);
+		if (result.ok) {
+			setFavorited(result.favorited);
+		}
+	};
+
 	return (
 		<article className="blog-detail">
-			{/* Navigation back and admin controls */}
 			<div className="flex flex-wrap items-center justify-between gap-4 mb-6">
 				<Button
 					variant="ghost"
@@ -84,28 +131,104 @@ export default function PostDetailView({
 					Back to Articles
 				</Button>
 
-				{isAdmin && (
-					<div className="flex items-center gap-2">
+				<div className="flex items-center gap-2">
+					{canFavorite && (
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={() => setIsEditModalOpen(true)}
+							onClick={handleFavorite}
 							className="bg-surface gap-1.5"
+							aria-pressed={favorited}
+							aria-label={
+								favorited ? "Remove from favorites" : "Add to favorites"
+							}
 						>
-							<Edit3 size={15} />
-							Edit Post
+							<Heart
+								size={15}
+								className={favorited ? "fill-current text-red-500" : undefined}
+							/>
+							{favorited ? "Favorited" : "Favorite"}
 						</Button>
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setIsDeleteDialogOpen(true)}
-							className="gap-1.5 bg-red-500 text-white hover:bg-red-600"
+					)}
+					<Dialog>
+						<DialogTrigger
+							render={
+								<Button
+									variant="outline"
+									size="sm"
+									className="bg-surface gap-1.5"
+									aria-label="Share this post"
+								/>
+							}
 						>
-							<Trash2 size={15} />
-							Delete Post
-						</Button>
-					</div>
-				)}
+							<Share2 size={15} />
+							Share
+						</DialogTrigger>
+						<DialogContent showCloseButton>
+							<DialogHeader>
+								<DialogTitle>Share this post</DialogTitle>
+								<DialogDescription>
+									Choose where you would like to share it.
+								</DialogDescription>
+							</DialogHeader>
+							<div className="flex justify-center gap-4 mt-4">
+								<WhatsappShareButton
+									url={resolvedShareUrl}
+									title={post.title}
+									aria-label="Share on WhatsApp"
+								>
+									<WhatsappIcon size={48} round />
+								</WhatsappShareButton>
+								<LinkedinShareButton
+									url={resolvedShareUrl}
+									title={post.title}
+									aria-label="Share on LinkedIn"
+								>
+									<LinkedinIcon size={48} round />
+								</LinkedinShareButton>
+								<FacebookShareButton
+									url={resolvedShareUrl}
+									aria-label="Share on Facebook"
+								>
+									<FacebookIcon size={48} round />
+								</FacebookShareButton>
+							</div>
+							<DialogFooter>
+								<DialogClose
+									render={
+										<Button className="bg-foreground text-surface">
+											Close
+										</Button>
+									}
+								>
+									Close
+								</DialogClose>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
+					{isAdmin && (
+						<>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setIsEditModalOpen(true)}
+								className="bg-surface gap-1.5"
+							>
+								<Edit3 size={15} />
+								Edit Post
+							</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => setIsDeleteDialogOpen(true)}
+								className="gap-1.5 bg-red-500 text-white hover:bg-red-600"
+							>
+								<Trash2 size={15} />
+								Delete Post
+							</Button>
+						</>
+					)}
+				</div>
 			</div>
 
 			<header className="blog-detail__header">
@@ -138,7 +261,6 @@ export default function PostDetailView({
 				</div>
 			</header>
 
-			{/* Optional Featured Image */}
 			{post.imageURL && (
 				<div className="relative w-full aspect-video max-h-96 rounded-xl overflow-hidden border border-border mb-8 bg-muted">
 					<Image
@@ -152,10 +274,8 @@ export default function PostDetailView({
 				</div>
 			)}
 
-			{/* Post Content */}
 			<section className="blog-detail__content">{post.content}</section>
 
-			{/* Admin Edit Modal */}
 			{isAdmin && (
 				<>
 					<PostModal

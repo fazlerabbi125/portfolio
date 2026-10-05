@@ -2,7 +2,7 @@
 
 import argon2 from "argon2";
 import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
+import { refresh } from 'next/cache'
 import { db } from "@/drizzle/db";
 import { users } from "@/drizzle/schema";
 import { USER_ROLES } from "@/lib/constants";
@@ -100,5 +100,5 @@ export async function register(
 export async function logout(): Promise<void> {
 	const session = await getSession();
 	session.destroy();
-	redirect("/blog");
+	refresh();
 }

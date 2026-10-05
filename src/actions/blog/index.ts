@@ -1,11 +1,17 @@
 "use server";
 
-import { desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { cache } from "react";
 import { db } from "@/drizzle/db";
-import { categories, postCategories, posts } from "@/drizzle/schema";
+import {
+	categories,
+	postCategories,
+	posts,
+	userFavorites,
+} from "@/drizzle/schema";
 import { USER_ROLES } from "@/lib/constants";
-import { requireAuth } from "@/lib/session";
+import { getCurrentUser, requireAuth } from "@/lib/session";
 import {
 	type CategoryInput,
 	categorySchema,
@@ -14,6 +20,35 @@ import {
 } from "@/schemas/blog.schema";
 
 const POSTS_PER_PAGE = 15;
+
+async function attachCategories<T extends { id: number }>(postRows: T[]) {
+	const categoryRows = postRows.length
+		? await db
+				.select({
+					postId: postCategories.postId,
+					categoryId: categories.id,
+					name: categories.name,
+				})
+				.from(postCategories)
+				.innerJoin(categories, eq(postCategories.categoryId, categories.id))
+				.where(
+					inArray(
+						postCategories.postId,
+						postRows.map((post) => post.id),
+					),
+				)
+		: [];
+
+	return postRows.map((post) => ({
+		...post,
+		categoryIds: categoryRows
+			.filter((category) => category.postId === post.id)
+			.map((category) => category.categoryId),
+		category: categoryRows
+			.filter((category) => category.postId === post.id)
+			.map(({ categoryId, name }) => ({ id: categoryId, name })),
+	}));
+}
 
 // ─── Posts ────────────────────────────────────────────────────────────────────
 
@@ -53,42 +88,125 @@ export async function getPosts({
 		searchFilter ? postsQuery.where(searchFilter) : postsQuery,
 		searchFilter ? countQuery.where(searchFilter) : countQuery,
 	]);
-	const categoryRows = postRows.length
-		? await db
-				.select({
-					postId: postCategories.postId,
-					categoryId: categories.id,
-					name: categories.name,
-				})
-				.from(postCategories)
-				.innerJoin(categories, eq(postCategories.categoryId, categories.id))
-				.where(
-					inArray(
-						postCategories.postId,
-						postRows.map((post) => post.id),
-					),
-				)
-		: [];
 
 	const total = countRow[0]?.count ?? 0;
 
 	return {
-		posts: postRows.map((post) => ({
-			...post,
-			categoryIds: categoryRows
-				.filter((category) => category.postId === post.id)
-				.map((category) => category.categoryId),
-			category: categoryRows
-				.filter((category) => category.postId === post.id)
-				.map(({ categoryId, name }) => ({ id: categoryId, name })),
-		})),
+		posts: await attachCategories(postRows),
 		total,
 		totalPages: Math.ceil(total / POSTS_PER_PAGE),
 		currentPage: page,
 	};
 }
 
-export async function getPostById(id: number) {
+export async function getFavoritePosts({
+	page = 1,
+	search = "",
+}: {
+	page?: number;
+	search?: string;
+}) {
+	const user = await requireAuth();
+	const offset = (page - 1) * POSTS_PER_PAGE;
+	const trimmedSearch = search.trim();
+	const searchFilter = trimmedSearch
+		? or(
+				ilike(posts.title, `%${trimmedSearch}%`),
+				ilike(posts.content, `%${trimmedSearch}%`),
+			)
+		: undefined;
+	const favoritesFilter = and(
+		eq(userFavorites.userId, user.id),
+		searchFilter,
+	);
+
+	const countQuery = db
+		.select({ count: sql<number>`cast(count(*) as int)` })
+		.from(posts)
+		.innerJoin(userFavorites, eq(userFavorites.postId, posts.id));
+
+	const postsQuery = db
+		.select({
+			id: posts.id,
+			title: posts.title,
+			content: posts.content,
+			createdAt: posts.createdAt,
+		})
+		.from(posts)
+		.innerJoin(userFavorites, eq(userFavorites.postId, posts.id))
+		.orderBy(desc(posts.createdAt))
+		.limit(POSTS_PER_PAGE)
+		.offset(offset);
+
+	const [postRows, countRow] = await Promise.all([
+		favoritesFilter ? postsQuery.where(favoritesFilter) : postsQuery,
+		favoritesFilter ? countQuery.where(favoritesFilter) : countQuery,
+	]);
+
+	const total = countRow[0]?.count ?? 0;
+
+	return {
+		posts: await attachCategories(postRows),
+		total,
+		totalPages: Math.ceil(total / POSTS_PER_PAGE),
+		currentPage: page,
+	};
+}
+
+export async function isPostFavorited(postId: number): Promise<boolean> {
+	const user = await getCurrentUser();
+	if (!user || user.role !== USER_ROLES.USER) return false;
+
+	const [favorite] = await db
+		.select({ postId: userFavorites.postId })
+		.from(userFavorites)
+		.where(
+			and(eq(userFavorites.userId, user.id), eq(userFavorites.postId, postId)),
+		)
+		.limit(1);
+
+	return Boolean(favorite);
+}
+
+export async function toggleFavorite(
+	postId: number,
+): Promise<{ ok: boolean; favorited: boolean; message: string }> {
+	const user = await requireAuth();
+	if (user.role !== USER_ROLES.USER) {
+		return { ok: false, favorited: false, message: "Forbidden" };
+	}
+
+	const [existing] = await db
+		.select({ postId: userFavorites.postId })
+		.from(userFavorites)
+		.where(
+			and(eq(userFavorites.userId, user.id), eq(userFavorites.postId, postId)),
+		)
+		.limit(1);
+
+	if (existing) {
+		await db
+			.delete(userFavorites)
+			.where(
+				and(
+					eq(userFavorites.userId, user.id),
+					eq(userFavorites.postId, postId),
+				),
+			);
+		revalidatePath("/blog");
+		revalidatePath(`/blog/${postId}`);
+		revalidatePath("/blog/favorites");
+		return { ok: true, favorited: false, message: "Removed from favorites" };
+	}
+
+	await db.insert(userFavorites).values({ userId: user.id, postId });
+	revalidatePath("/blog");
+	revalidatePath(`/blog/${postId}`);
+	revalidatePath("/blog/favorites");
+	return { ok: true, favorited: true, message: "Added to favorites" };
+}
+
+export const getPostById = cache(async (id: number) => {
 	const [post] = await db
 		.select({
 			id: posts.id,
@@ -118,7 +236,7 @@ export async function getPostById(id: number) {
 		categoryIds: categoryRows.map((category) => category.id),
 		category: categoryRows,
 	};
-}
+});
 
 export async function createPost(
 	input: PostInput,

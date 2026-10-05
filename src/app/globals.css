@@ -66,7 +66,9 @@
 	--font-sans: var(--font-inter);
 	--breakpoint-tablet: 768px;
 	--breakpoint-desktop: 1024px;
-	--color-destructive: var(--color-red-500);
+	--color-destructive: var(--color-red-600);
+	--color-tertiary: var(--tertiary);
+
 }
 
 * {

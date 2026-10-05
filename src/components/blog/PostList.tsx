@@ -6,14 +6,12 @@ import {
 	ChevronsLeft,
 	ChevronsRight,
 	LogIn,
-	LogOut,
 	Plus,
 	Tags,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { logout } from "@/actions/auth";
 import AuthModal from "@/components/blog/AuthModal";
 import CategoryModal from "@/components/blog/CategoryModal";
 import PostCard, { type PostCardData } from "@/components/blog/PostCard";
@@ -37,6 +35,7 @@ interface PostListProps {
 	currentPage: number;
 	categories: Category[];
 	currentUser: SessionData | null;
+	mode?: "blog" | "favorites";
 }
 
 type PageToken = number | "start-ellipsis" | "end-ellipsis";
@@ -69,6 +68,7 @@ export default function PostList({
 	currentPage,
 	categories,
 	currentUser,
+	mode = "blog",
 }: Readonly<PostListProps>) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -78,6 +78,7 @@ export default function PostList({
 	const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
 	const isAdmin = currentUser?.role === USER_ROLES.ADMIN;
+	const showManagementBar = mode === "blog" && (isAdmin || !currentUser);
 
 	const createPageUrl = (pageNumber: number) => {
 		const params = new URLSearchParams(searchParams.toString());
@@ -87,55 +88,41 @@ export default function PostList({
 
 	return (
 		<>
-			{/* Top User & Management Bar */}
-			<div className="blog-header-bar">
-				{currentUser ? (
-					<div className="blog-header-bar__actions ml-auto">
-						{isAdmin && (
-							<>
-								<Button
-									size="sm"
-									onClick={() => setIsPostModalOpen(true)}
-									className="gap-1.5"
-								>
-									<Plus size={15} />
-									New Post
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => setIsCategoryModalOpen(true)}
-									className="bg-surface gap-1.5"
-								>
-									<Tags size={15} />
-									Categories
-								</Button>
-							</>
-						)}
-						<form action={logout}>
+			{showManagementBar && (
+				<div className="blog-header-bar">
+					{isAdmin ? (
+						<div className="blog-header-bar__actions ml-auto">
 							<Button
-								variant="ghost"
 								size="sm"
-								type="submit"
-								className="gap-1.5 text-muted-foreground hover:text-foreground"
+								onClick={() => setIsPostModalOpen(true)}
+								className="gap-1.5"
 							>
-								<LogOut size={15} />
-								Logout
+								<Plus size={15} />
+								New Post
 							</Button>
-						</form>
-					</div>
-				) : (
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => setIsAuthModalOpen(true)}
-						className="blog-header-bar__user gap-1.5"
-					>
-						<LogIn size={15} />
-						Log in / Register for additional features.
-					</Button>
-				)}
-			</div>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setIsCategoryModalOpen(true)}
+								className="bg-surface gap-1.5"
+							>
+								<Tags size={15} />
+								Categories
+							</Button>
+						</div>
+					) : (
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => setIsAuthModalOpen(true)}
+							className="blog-header-bar__user gap-1.5"
+						>
+							<LogIn size={15} />
+							Log in / Register for additional features.
+						</Button>
+					)}
+				</div>
+			)}
 
 			<div className="mb-[4rem] px-4 flex justify-center">
 				<SearchBar />
@@ -154,7 +141,9 @@ export default function PostList({
 					<p className="text-sm">
 						{searchParams.get("search")
 							? "Try changing your search terms or clearing the filter."
-							: "There are currently no blog articles published."}
+							: mode === "favorites"
+								? "You have not favorited any articles yet."
+								: "There are currently no blog articles published."}
 					</p>
 				</div>
 			)}

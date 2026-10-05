@@ -1,119 +1,151 @@
 "use client";
 
-import { Home, Menu, Share2, X } from "lucide-react";
+import { Heart, Home, LogOut, Menu, User as UserIcon, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import {
-	FacebookIcon,
-	FacebookShareButton,
-	LinkedinIcon,
-	LinkedinShareButton,
-	WhatsappIcon,
-	WhatsappShareButton,
-} from "react-share";
-import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
+import { logout } from "@/actions/auth";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuSub,
 	DropdownMenuSubContent,
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { NAVIGATION_LINKS } from "@/lib/constants";
+import {
+	NavigationMenu,
+	NavigationMenuContent,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	NavigationMenuTrigger,
+	navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { NAVIGATION_LINKS, USER_ROLES } from "@/lib/constants";
+import type { SessionData } from "@/lib/session";
 import "./AppHeader.css";
 
 const navLinkValues = Object.values(NAVIGATION_LINKS);
+const pageLinks = navLinkValues.filter(
+	({ route }) => !route.startsWith("/gallery/"),
+);
+const galleryLinks = navLinkValues.filter(({ route }) =>
+	route.startsWith("/gallery/"),
+);
 
-export default function AppHeader() {
+function isActivePath(pathname: string, route: string) {
+	return pathname === route;
+}
+
+interface AppHeaderProps {
+	currentUser: SessionData | null;
+}
+
+export default function AppHeader({ currentUser }: Readonly<AppHeaderProps>) {
 	const pathname = usePathname();
-	const [shareUrl, setShareUrl] = useState("");
+	const isHome = pathname === "/";
+	const isGalleryActive = pathname.startsWith("/gallery/");
 
 	return (
 		<header className="app-header">
 			<div className="app-header__inner">
-				<Link href="/" aria-current={pathname === "/" ? "page" : undefined}>
+				<Link href="/" aria-current={isHome ? "page" : undefined}>
 					<Home size={22} />
 				</Link>
+
+				{!isHome && (
+					<nav className="app-header__nav" aria-label="Primary">
+						<NavigationMenu>
+							<NavigationMenuList>
+								{pageLinks.slice(0, 3).map(({ label, route }) => (
+									<NavigationMenuItem key={route}>
+										<NavigationMenuLink
+											active={isActivePath(pathname, route)}
+											render={
+												<Link
+													href={route}
+													className={
+														isActivePath(pathname, route) ? "active" : undefined
+													}
+													aria-current={
+														isActivePath(pathname, route) ? "page" : undefined
+													}
+												/>
+											}
+											className={navigationMenuTriggerStyle()}
+										>
+											{label}
+										</NavigationMenuLink>
+									</NavigationMenuItem>
+								))}
+								<NavigationMenuItem>
+									<NavigationMenuTrigger
+										className={isGalleryActive ? "bg-muted/50" : undefined}
+									>
+										Gallery
+									</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<ul className="grid min-w-44 gap-1">
+											{galleryLinks.map(({ label, route }) => (
+												<li key={route}>
+													<NavigationMenuLink
+														active={isActivePath(pathname, route)}
+														render={
+															<Link
+																href={route}
+																className={
+																	isActivePath(pathname, route)
+																		? "text-tertiary pointer-events-none"
+																		: undefined
+																}
+																aria-current={
+																	isActivePath(pathname, route)
+																		? "page"
+																		: undefined
+																}
+															/>
+														}
+													>
+														{label}
+													</NavigationMenuLink>
+												</li>
+											))}
+										</ul>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+								{pageLinks.slice(3).map(({ label, route }) => (
+									<NavigationMenuItem key={route}>
+										<NavigationMenuLink
+											active={isActivePath(pathname, route)}
+											render={
+												<Link
+													href={route}
+													className={
+														isActivePath(pathname, route) ? "active" : undefined
+													}
+													aria-current={
+														isActivePath(pathname, route) ? "page" : undefined
+													}
+												/>
+											}
+											className={navigationMenuTriggerStyle()}
+										>
+											{label}
+										</NavigationMenuLink>
+									</NavigationMenuItem>
+								))}
+							</NavigationMenuList>
+						</NavigationMenu>
+					</nav>
+				)}
+
 				<div className="app-header__actions">
-					<Dialog
-						onOpenChange={(open) =>
-							open &&
-							setShareUrl(
-								process.env.NEXT_PUBLIC_APP_URL ||
-									new URL("/", window.location.href).toString(),
-							)
-						}
-					>
-						<DialogTrigger
-							render={
-								<Button
-									variant="ghost"
-									size="icon"
-									aria-label="Share portfolio"
-								/>
-							}
-						>
-							<Share2 size={18} />
-						</DialogTrigger>
-						<DialogContent showCloseButton>
-							<DialogHeader>
-								<DialogTitle>Share this portfolio</DialogTitle>
-								<DialogDescription>
-									Choose where you would like to share it.
-								</DialogDescription>
-							</DialogHeader>
-							<div className="flex justify-center gap-4 mt-4">
-								<WhatsappShareButton
-									url={shareUrl}
-									title="Fazle Rabbi Faiyaz — Portfolio"
-									aria-label="Share on WhatsApp"
-								>
-									<WhatsappIcon size={48} round />
-								</WhatsappShareButton>
-								<LinkedinShareButton
-									url={shareUrl}
-									title="Fazle Rabbi Faiyaz — Portfolio"
-									aria-label="Share on LinkedIn"
-								>
-									<LinkedinIcon size={48} round />
-								</LinkedinShareButton>
-								<FacebookShareButton
-									url={shareUrl}
-									aria-label="Share on Facebook"
-								>
-									<FacebookIcon size={48} round />
-								</FacebookShareButton>
-							</div>
-							<DialogFooter>
-								<DialogClose
-									render={
-										<Button className="bg-foreground text-surface">
-											Close
-										</Button>
-									}
-								>
-									Close
-								</DialogClose>
-							</DialogFooter>
-						</DialogContent>
-					</Dialog>
-					{pathname !== "/" && (
+					{!isHome && (
 						<DropdownMenu>
 							<DropdownMenuTrigger
-								className="nav-dropdown__trigger"
+								className="nav-dropdown__trigger app-header__menu-toggle"
 								aria-label="Open page navigation"
 							>
 								<Menu aria-hidden="true" className="nav-dropdown__icon" />
@@ -124,79 +156,123 @@ export default function AppHeader() {
 								align="end"
 								className="nav-dropdown__content"
 							>
-								{navLinkValues
-									.filter(({ route }) => !route.startsWith("/gallery/"))
-									.slice(0, 3)
-									.map(({ label, route }) => (
-										<DropdownMenuItem
-											key={route}
-											render={
-												<Link
-													href={route}
-													aria-current={pathname === route ? "page" : undefined}
-													className={
-														pathname === route
-															? "nav-dropdown__item--active"
-															: undefined
-													}
-												/>
-											}
-										>
-											{label}
-										</DropdownMenuItem>
-									))}
+								{pageLinks.slice(0, 3).map(({ label, route }) => (
+									<DropdownMenuItem
+										key={route}
+										render={
+											<Link
+												href={route}
+												aria-current={
+													isActivePath(pathname, route) ? "page" : undefined
+												}
+												className={
+													isActivePath(pathname, route)
+														? "nav-dropdown__item--active"
+														: undefined
+												}
+											/>
+										}
+									>
+										{label}
+									</DropdownMenuItem>
+								))}
 								<DropdownMenuSub>
 									<DropdownMenuSubTrigger>Gallery</DropdownMenuSubTrigger>
 									<DropdownMenuSubContent className="nav-dropdown__content">
-										{navLinkValues
-											.filter(({ route }) => route.startsWith("/gallery/"))
-											.map(({ label, route }) => (
-												<DropdownMenuItem
-													key={route}
-													render={
-														<Link
-															href={route}
-															aria-current={
-																pathname === route ? "page" : undefined
-															}
-															className={
-																pathname === route
-																	? "nav-dropdown__item--active"
-																	: undefined
-															}
-														/>
-													}
-												>
-													{label}
-												</DropdownMenuItem>
-											))}
+										{galleryLinks.map(({ label, route }) => (
+											<DropdownMenuItem
+												key={route}
+												render={
+													<Link
+														href={route}
+														aria-current={
+															isActivePath(pathname, route) ? "page" : undefined
+														}
+														className={
+															isActivePath(pathname, route)
+																? "nav-dropdown__item--active"
+																: undefined
+														}
+													/>
+												}
+											>
+												{label}
+											</DropdownMenuItem>
+										))}
 									</DropdownMenuSubContent>
 								</DropdownMenuSub>
-								{navLinkValues
-									.filter(({ route }) => !route.startsWith("/gallery/"))
-									.slice(3)
-									.map(({ label, route }) => (
-										<DropdownMenuItem
-											key={route}
-											render={
-												<Link
-													href={route}
-													aria-current={pathname === route ? "page" : undefined}
-													className={
-														pathname === route
-															? "nav-dropdown__item--active"
-															: undefined
-													}
-												/>
-											}
-										>
-											{label}
-										</DropdownMenuItem>
-									))}
+								{pageLinks.slice(3).map(({ label, route }) => (
+									<DropdownMenuItem
+										key={route}
+										render={
+											<Link
+												href={route}
+												aria-current={
+													isActivePath(pathname, route) ? "page" : undefined
+												}
+												className={
+													isActivePath(pathname, route)
+														? "nav-dropdown__item--active"
+														: undefined
+												}
+											/>
+										}
+									>
+										{label}
+									</DropdownMenuItem>
+								))}
 							</DropdownMenuContent>
 						</DropdownMenu>
 					)}
-					{/* <button className="icon-button" aria-label="Toggle colour theme">Theme toggle</button> */}
+
+					{currentUser && (
+						<DropdownMenu>
+							<DropdownMenuTrigger
+								className="user-avatar"
+								aria-label={`Account menu for ${currentUser.name}`}
+							>
+								<UserIcon size={22} />
+							</DropdownMenuTrigger>
+							<DropdownMenuContent
+								align="end"
+								className="nav-dropdown__content"
+							>
+								{currentUser.role === USER_ROLES.USER && (
+									<DropdownMenuItem
+										render={
+											<Link
+												href="/blog/favorites"
+												aria-current={
+													pathname === "/blog/favorites" ? "page" : undefined
+												}
+											/>
+										}
+									>
+										<Heart size={15} />
+										Favorites
+									</DropdownMenuItem>
+								)}
+								{currentUser.role === USER_ROLES.USER && (
+									<DropdownMenuSeparator />
+								)}
+								<form action={logout} id="header-logout" />
+								<DropdownMenuItem
+									variant="destructive"
+									render={
+										<button
+											type="submit"
+											form="header-logout"
+											className="w-full text-left font-normal"
+										/>
+									}
+									nativeButton
+								>
+									<LogOut size={15} />
+									Logout
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					)}
 				</div>
 			</div>
 		</header>
