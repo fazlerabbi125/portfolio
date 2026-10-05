@@ -1,11 +1,9 @@
 "use client";
 import { Play } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
-	CardAction,
 	CardContent,
 	CardDescription,
 	CardHeader,
@@ -24,7 +22,7 @@ export default function VideoDisplay() {
 
 	return (
 		<section className="video-display">
-			<Card className="video-display-card">
+			<Card className="video-display-card gap-5">
 				<VideoPlayer
 					className="w-full aspect-video rounded-b-none"
 					playerSettings={{
@@ -33,9 +31,6 @@ export default function VideoDisplay() {
 					}}
 				/>
 				<CardHeader>
-					<CardAction>
-						<Badge variant="secondary">Duration: {activeVideo.duration}</Badge>
-					</CardAction>
 					<CardTitle>{activeVideo.title}</CardTitle>
 				</CardHeader>
 				{activeVideo.description && (

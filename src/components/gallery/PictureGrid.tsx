@@ -13,19 +13,19 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { PICTURE_GALLERY } from "@/lib/constants";
+import pictures from "@/data/pictures.json";
 import "./Gallery.css";
 
 export default function PictureGrid() {
 	const [visibleCount, setVisibleCount] = useState(10);
-	const [selected, setSelected] = useState<
-		(typeof PICTURE_GALLERY)[number] | null
-	>(null);
+	const [selected, setSelected] = useState<(typeof pictures)[number] | null>(
+		null,
+	);
 
 	return (
 		<>
 			<div className="gallery-grid">
-				{PICTURE_GALLERY.slice(0, visibleCount).map((picture) => (
+				{pictures.slice(0, visibleCount).map((picture) => (
 					<button
 						className="gallery-grid__item"
 						key={picture.title}
@@ -46,13 +46,11 @@ export default function PictureGrid() {
 					</button>
 				))}
 			</div>
-			{visibleCount < PICTURE_GALLERY.length && (
+			{visibleCount < pictures.length && (
 				<div className="gallery-load-more">
 					<Button
 						onClick={() =>
-							setVisibleCount((count) =>
-								Math.min(count + 8, PICTURE_GALLERY.length),
-							)
+							setVisibleCount((count) => Math.min(count + 10, pictures.length))
 						}
 					>
 						Load more pictures

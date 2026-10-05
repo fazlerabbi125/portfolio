@@ -93,13 +93,14 @@
 	grid-template-areas:
 		"icon title"
 		"icon duration";
-	padding: 0.25rem 0.5rem;
+	padding: 0.5rem;
 	align-items: center;
 	column-gap: 0.75rem;
 	row-gap: 0.25rem;
 	background-color: var(--playlist-btn-bg);
 	color: var(--playlist-btn-color);
 	min-height: 4rem;
+	height: auto;
 
 	&:hover:not(:disabled) {
 		--playlist-btn-bg: var(--tertiary);
@@ -125,6 +126,8 @@
 	line-height: 1.25;
 	text-align: left;
 	overflow: hidden;
+	white-space: normal;
+	overflow-wrap: anywhere;
 }
 
 .video-display-playlist button [data-type="duration"] {

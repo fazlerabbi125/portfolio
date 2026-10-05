@@ -147,7 +147,7 @@ export default function PostDetailView({
 								size={15}
 								className={favorited ? "fill-current text-red-500" : undefined}
 							/>
-							{favorited ? "Favorited" : "Favorite"}
+							{favorited ? "Unfavorite" : "Favorite"}
 						</Button>
 					)}
 					<Dialog>

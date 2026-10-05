@@ -91,6 +91,7 @@ export default function AppHeader({ currentUser }: Readonly<AppHeaderProps>) {
 											{galleryLinks.map(({ label, route }) => (
 												<li key={route}>
 													<NavigationMenuLink
+														closeOnClick
 														active={isActivePath(pathname, route)}
 														render={
 															<Link
