@@ -2,6 +2,7 @@
 
 import { Resend } from "resend";
 
+/** Sends a validated portfolio contact email through Resend. */
 export async function sendEmail(input: {
 	name: string;
 	email: string;

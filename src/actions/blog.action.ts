@@ -1,6 +1,6 @@
 "use server";
 
-import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, exists, ilike, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cache } from "react";
 import { db } from "@/drizzle/db";
@@ -12,54 +12,27 @@ import {
 } from "@/drizzle/schema";
 import { USER_ROLES } from "@/lib/constants";
 import { getCurrentUser, requireAuth } from "@/lib/session";
+import { attachCategories } from "@/queries/blog.query";
 import {
 	type CategoryInput,
 	categorySchema,
 	type PostInput,
 	postSchema,
 } from "@/schemas/blog.schema";
+import type { PaginatedPosts } from "@/types/blog";
 
 const POSTS_PER_PAGE = 15;
 
-async function attachCategories<T extends { id: number }>(postRows: T[]) {
-	const categoryRows = postRows.length
-		? await db
-				.select({
-					postId: postCategories.postId,
-					categoryId: categories.id,
-					name: categories.name,
-				})
-				.from(postCategories)
-				.innerJoin(categories, eq(postCategories.categoryId, categories.id))
-				.where(
-					inArray(
-						postCategories.postId,
-						postRows.map((post) => post.id),
-					),
-				)
-		: [];
-
-	return postRows.map((post) => ({
-		...post,
-		categoryIds: categoryRows
-			.filter((category) => category.postId === post.id)
-			.map((category) => category.categoryId),
-		category: categoryRows
-			.filter((category) => category.postId === post.id)
-			.map(({ categoryId, name }) => ({ id: categoryId, name })),
-	}));
-}
-
-// ─── Posts ────────────────────────────────────────────────────────────────────
-
+/** Returns a filtered page of published posts and categories. */
 export async function getPosts({
+	categoryId,
 	page = 1,
 	search = "",
 }: {
+	categoryId?: number;
 	page?: number;
 	search?: string;
-}) {
-	const offset = (page - 1) * POSTS_PER_PAGE;
+}): Promise<PaginatedPosts> {
 	const trimmedSearch = search.trim();
 	const searchFilter = trimmedSearch
 		? or(
@@ -67,7 +40,22 @@ export async function getPosts({
 				ilike(posts.content, `%${trimmedSearch}%`),
 			)
 		: undefined;
+	const categoryFilter = categoryId
+		? exists(
+				db
+					.select({ id: postCategories.postId })
+					.from(postCategories)
+					.where(
+						and(
+							eq(postCategories.postId, posts.id),
+							eq(postCategories.categoryId, categoryId),
+						),
+					),
+			)
+		: undefined;
+	const filters = and(searchFilter, categoryFilter);
 
+	const offset = (page - 1) * POSTS_PER_PAGE;
 	const countQuery = db
 		.select({ count: sql<number>`cast(count(*) as int)` })
 		.from(posts);
@@ -85,8 +73,8 @@ export async function getPosts({
 		.offset(offset);
 
 	const [postRows, countRow] = await Promise.all([
-		searchFilter ? postsQuery.where(searchFilter) : postsQuery,
-		searchFilter ? countQuery.where(searchFilter) : countQuery,
+		filters ? postsQuery.where(filters) : postsQuery,
+		filters ? countQuery.where(filters) : countQuery,
 	]);
 
 	const total = countRow[0]?.count ?? 0;
@@ -99,13 +87,16 @@ export async function getPosts({
 	};
 }
 
+/** Returns a filtered page of the signed-in user's favourite posts. */
 export async function getFavoritePosts({
+	categoryId,
 	page = 1,
 	search = "",
 }: {
+	categoryId?: number;
 	page?: number;
 	search?: string;
-}) {
+}): Promise<PaginatedPosts> {
 	const user = await requireAuth();
 	const offset = (page - 1) * POSTS_PER_PAGE;
 	const trimmedSearch = search.trim();
@@ -115,9 +106,23 @@ export async function getFavoritePosts({
 				ilike(posts.content, `%${trimmedSearch}%`),
 			)
 		: undefined;
+	const categoryFilter = categoryId
+		? exists(
+				db
+					.select({ id: postCategories.postId })
+					.from(postCategories)
+					.where(
+						and(
+							eq(postCategories.postId, posts.id),
+							eq(postCategories.categoryId, categoryId),
+						),
+					),
+			)
+		: undefined;
 	const favoritesFilter = and(
 		eq(userFavorites.userId, user.id),
 		searchFilter,
+		categoryFilter,
 	);
 
 	const countQuery = db
@@ -153,9 +158,10 @@ export async function getFavoritePosts({
 	};
 }
 
+/** Checks whether the signed-in user has favourited a post. */
 export async function isPostFavorited(postId: number): Promise<boolean> {
 	const user = await getCurrentUser();
-	if (!user || user.role !== USER_ROLES.USER) return false;
+	if (user?.role !== USER_ROLES.USER) return false;
 
 	const [favorite] = await db
 		.select({ postId: userFavorites.postId })
@@ -168,6 +174,7 @@ export async function isPostFavorited(postId: number): Promise<boolean> {
 	return Boolean(favorite);
 }
 
+/** Adds or removes a post from the signed-in user's favourites. */
 export async function toggleFavorite(
 	postId: number,
 ): Promise<{ ok: boolean; favorited: boolean; message: string }> {
@@ -206,6 +213,7 @@ export async function toggleFavorite(
 	return { ok: true, favorited: true, message: "Added to favorites" };
 }
 
+/** Retrieves a post and its attached categories by identifier. */
 export const getPostById = cache(async (id: number) => {
 	const [post] = await db
 		.select({
@@ -233,11 +241,14 @@ export const getPostById = cache(async (id: number) => {
 
 	return {
 		...post,
-		categoryIds: categoryRows.map((category) => category.id),
+		categoryIds: categoryRows.map(
+			(category: (typeof categoryRows)[0]) => category.id,
+		),
 		category: categoryRows,
 	};
 });
 
+/** Creates a post and its category links for an administrator. */
 export async function createPost(
 	input: PostInput,
 ): Promise<{ ok: boolean; message: string }> {
@@ -281,6 +292,7 @@ export async function createPost(
 	return { ok: true, message: "Post created successfully" };
 }
 
+/** Updates a post and replaces its category links for an administrator. */
 export async function updatePost(
 	id: number,
 	input: PostInput,
@@ -328,6 +340,7 @@ export async function updatePost(
 	return { ok: true, message: "Post updated successfully" };
 }
 
+/** Deletes a post for an administrator. */
 export async function deletePost(
 	id: number,
 ): Promise<{ ok: boolean; message: string }> {
@@ -343,6 +356,7 @@ export async function deletePost(
 
 // ─── Categories ───────────────────────────────────────────────────────────────
 
+/** Returns all categories in alphabetical order. */
 export async function getCategories() {
 	return db
 		.select({
@@ -354,6 +368,7 @@ export async function getCategories() {
 		.orderBy(categories.name);
 }
 
+/** Creates a category for an administrator. */
 export async function createCategory(
 	input: CategoryInput,
 ): Promise<{ ok: boolean; message: string }> {
@@ -389,6 +404,7 @@ export async function createCategory(
 	return { ok: true, message: "Category created successfully" };
 }
 
+/** Updates a category for an administrator. */
 export async function updateCategory(
 	id: number,
 	input: CategoryInput,
@@ -416,6 +432,7 @@ export async function updateCategory(
 	return { ok: true, message: "Category updated successfully" };
 }
 
+/** Deletes a category for an administrator. */
 export async function deleteCategory(
 	id: number,
 ): Promise<{ ok: boolean; message: string }> {

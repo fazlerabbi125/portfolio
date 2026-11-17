@@ -11,3 +11,6 @@ export const db = drizzle({
 	logger: process.env.NODE_ENV === "development",
 	relations,
 });
+
+export type Database = typeof db;
+export type DatabaseQuery = Database["query"];

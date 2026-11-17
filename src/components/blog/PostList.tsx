@@ -1,25 +1,20 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
-	ChevronLeft,
-	ChevronRight,
-	ChevronsLeft,
-	ChevronsRight,
-	LogIn,
-	Plus,
-	Tags,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import AuthModal from "@/components/blog/AuthModal";
-import CategoryModal from "@/components/blog/CategoryModal";
-import PostCard, { type PostCardData } from "@/components/blog/PostCard";
-import PostModal from "@/components/blog/PostModal";
-import SearchBar from "@/components/blog/SearchBar";
+	type SubmitEvent,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
+import { getFavoritePosts, getPosts } from "@/actions/blog.action";
+import PostCard from "@/components/blog/PostCard";
 import { Button } from "@/components/ui/button";
-import { USER_ROLES } from "@/lib/constants";
-import type { SessionData } from "@/lib/session";
+import { SearchInput } from "@/components/ui/search-input";
+import { Spinner } from "@/components/ui/spinner";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import type { BlogPostListItem } from "@/types/blog";
 import "./PostList.css";
 
 interface Category {
@@ -29,36 +24,12 @@ interface Category {
 }
 
 interface PostListProps {
-	posts: PostCardData[];
+	posts: BlogPostListItem[];
 	total: number;
 	totalPages: number;
 	currentPage: number;
 	categories: Category[];
-	currentUser: SessionData | null;
 	mode?: "blog" | "favorites";
-}
-
-type PageToken = number | "start-ellipsis" | "end-ellipsis";
-
-function getPageTokens(currentPage: number, totalPages: number): PageToken[] {
-	if (totalPages <= 5) {
-		return Array.from({ length: totalPages }, (_, i) => i + 1);
-	}
-	if (currentPage <= 3) {
-		return [1, 2, 3, "end-ellipsis", totalPages];
-	}
-	if (currentPage >= totalPages - 2) {
-		return [1, "start-ellipsis", totalPages - 2, totalPages - 1, totalPages];
-	}
-	return [
-		1,
-		"start-ellipsis",
-		currentPage - 1,
-		currentPage,
-		currentPage + 1,
-		"end-ellipsis",
-		totalPages,
-	];
 }
 
 export default function PostList({
@@ -67,71 +38,126 @@ export default function PostList({
 	totalPages,
 	currentPage,
 	categories,
-	currentUser,
 	mode = "blog",
 }: Readonly<PostListProps>) {
 	const pathname = usePathname();
+	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-	const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+	const [search, setSearch] = useState(searchParams.get("search") ?? "");
+	const [category, setCategory] = useState(searchParams.get("category") ?? "");
+	const [loadedPosts, setLoadedPosts] = useState(posts);
+	const [loadedPage, setLoadedPage] = useState(currentPage);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+	const isFetchingRef = useRef(false);
 
-	const isAdmin = currentUser?.role === USER_ROLES.ADMIN;
-	const showManagementBar = mode === "blog" && (isAdmin || !currentUser);
+	useEffect(() => {
+		setLoadedPosts(posts);
+		setLoadedPage(currentPage);
+	}, [currentPage, posts]);
 
-	const createPageUrl = (pageNumber: number) => {
-		const params = new URLSearchParams(searchParams.toString());
-		params.set("page", pageNumber.toString());
-		return `${pathname}?${params.toString()}`;
+	useEffect(() => {
+		setSearch(searchParams.get("search") ?? "");
+		setCategory(searchParams.get("category") ?? "");
+	}, [searchParams]);
+
+	const handleFilterSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const params = new URLSearchParams();
+		const trimmedSearch = search.trim();
+
+		if (trimmedSearch) params.set("search", trimmedSearch);
+		if (category) params.set("category", category);
+
+		const query = params.toString();
+		router.push(query ? `${pathname}?${query}` : pathname);
 	};
+
+	const handleFilterReset = () => {
+		setSearch("");
+		setCategory("");
+		setLoadedPosts(posts);
+		setLoadedPage(currentPage);
+		router.push(pathname);
+	};
+
+	const loadMorePosts = useCallback(async () => {
+		// An observer can fire again before state updates, so keep a synchronous guard.
+		if (isFetchingRef.current || loadedPage >= totalPages) return;
+
+		isFetchingRef.current = true;
+		setIsLoadingMore(true);
+		try {
+			const query = {
+				categoryId: Number(searchParams.get("category")) || undefined,
+				page: loadedPage + 1,
+				search: searchParams.get("search") ?? "",
+			};
+			const result =
+				mode === "favorites"
+					? await getFavoritePosts(query)
+					: await getPosts(query);
+			setLoadedPosts((current) => {
+				const knownIds = new Set(current.map((post) => post.id));
+				return [
+					...current,
+					...result.posts.filter((post) => !knownIds.has(post.id)),
+				];
+			});
+			setLoadedPage(result.currentPage);
+		} finally {
+			isFetchingRef.current = false;
+			setIsLoadingMore(false);
+		}
+	}, [loadedPage, mode, searchParams, totalPages]);
+
+	useInfiniteScroll(loadMoreRef, loadMorePosts);
 
 	return (
 		<>
-			{showManagementBar && (
-				<div className="blog-header-bar">
-					{isAdmin ? (
-						<div className="blog-header-bar__actions ml-auto">
-							<Button
-								size="sm"
-								onClick={() => setIsPostModalOpen(true)}
-								className="gap-1.5"
-							>
-								<Plus size={15} />
-								New Post
-							</Button>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => setIsCategoryModalOpen(true)}
-								className="bg-surface gap-1.5"
-							>
-								<Tags size={15} />
-								Categories
-							</Button>
-						</div>
-					) : (
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setIsAuthModalOpen(true)}
-							className="blog-header-bar__user gap-1.5"
-						>
-							<LogIn size={15} />
-							Log in / Register for additional features.
-						</Button>
-					)}
+			<form
+				className="mb-[4rem] flex flex-wrap items-center justify-center gap-3 px-4 sm:justify-end"
+				onSubmit={handleFilterSubmit}
+				onReset={handleFilterReset}
+			>
+				<div className="w-100 max-w-[20rem]">
+					<SearchInput
+						value={search}
+						onValueChange={setSearch}
+						aria-label="Search posts by title or content"
+						title="Search posts by title or content"
+						placeholder="Search posts by title or content…"
+						className="max-w-md"
+					/>
 				</div>
-			)}
-
-			<div className="mb-[4rem] px-4 flex justify-center">
-				<SearchBar />
-			</div>
+				<select
+					id="blog-category"
+					aria-label="Filter posts by category"
+					value={category}
+					onChange={(event) => setCategory(event.target.value)}
+					className="min-h-10 w-full max-w-xs rounded-lg border border-border bg-surface px-3 text-sm text-foreground"
+				>
+					<option value="">All categories</option>
+					{categories.map((item) => (
+						<option key={item.id} value={item.id}>
+							{item.name}
+						</option>
+					))}
+				</select>
+				<fieldset className="flex shrink-0 flex-nowrap gap-2">
+					<legend className="sr-only">Blog filter actions</legend>
+					<Button type="reset" variant="outline">
+						Reset
+					</Button>
+					<Button type="submit">Search</Button>
+				</fieldset>
+			</form>
 
 			{/* Posts Grid */}
 			{total > 0 ? (
 				<div className="post-grid">
-					{posts.map((post) => (
+					{loadedPosts.map((post) => (
 						<PostCard key={post.id} post={post} />
 					))}
 				</div>
@@ -148,110 +174,19 @@ export default function PostList({
 				</div>
 			)}
 
-			{/* Pagination Controls */}
-			{totalPages > 1 && (
-				<nav className="blog-pagination" aria-label="Blog pagination">
-					<Button
-						variant="outline"
-						size="icon-sm"
-						disabled={currentPage <= 1}
-						aria-label="First page"
-						render={
-							currentPage > 1 ? <Link href={createPageUrl(1)} /> : undefined
-						}
-					>
-						<ChevronsLeft size={16} />
-					</Button>
-
-					<Button
-						variant="outline"
-						size="icon-sm"
-						disabled={currentPage <= 1}
-						aria-label="Previous page"
-						render={
-							currentPage > 1 ? (
-								<Link href={createPageUrl(currentPage - 1)} />
-							) : undefined
-						}
-					>
-						<ChevronLeft size={16} />
-					</Button>
-
-					{getPageTokens(currentPage, totalPages).map((token) =>
-						typeof token === "number" ? (
-							<Button
-								key={token}
-								variant={token === currentPage ? "default" : "outline"}
-								size="sm"
-								className="min-w-8 h-8 px-2"
-								aria-current={token === currentPage ? "page" : undefined}
-								aria-label={`Page ${token}`}
-								render={
-									token !== currentPage ? (
-										<Link href={createPageUrl(token)} />
-									) : undefined
-								}
-							>
-								{token}
-							</Button>
-						) : (
-							<span
-								className="blog-pagination__ellipsis"
-								key={token}
-								aria-hidden="true"
-							>
-								…
-							</span>
-						),
+			{loadedPage < totalPages && (
+				<div
+					className="mt-8 flex min-h-10 justify-center"
+					ref={loadMoreRef}
+					aria-live="polite"
+				>
+					{isLoadingMore && (
+						<div className="flex items-center gap-2 text-muted-foreground">
+							<Spinner className="size-10" />
+							<span className="sr-only">Loading more posts</span>
+						</div>
 					)}
-
-					<Button
-						variant="outline"
-						size="icon-sm"
-						disabled={currentPage >= totalPages}
-						aria-label="Next page"
-						render={
-							currentPage < totalPages ? (
-								<Link href={createPageUrl(currentPage + 1)} />
-							) : undefined
-						}
-					>
-						<ChevronRight size={16} />
-					</Button>
-
-					<Button
-						variant="outline"
-						size="icon-sm"
-						disabled={currentPage >= totalPages}
-						aria-label="Last page"
-						render={
-							currentPage < totalPages ? (
-								<Link href={createPageUrl(totalPages)} />
-							) : undefined
-						}
-					>
-						<ChevronsRight size={16} />
-					</Button>
-				</nav>
-			)}
-
-			{/* Login / Register Dialog */}
-			<AuthModal open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} />
-
-			{/* Admin Post & Category Dialogs */}
-			{isAdmin && (
-				<>
-					<PostModal
-						open={isPostModalOpen}
-						onOpenChange={setIsPostModalOpen}
-						categories={categories}
-					/>
-					<CategoryModal
-						open={isCategoryModalOpen}
-						onOpenChange={setIsCategoryModalOpen}
-						categories={categories}
-					/>
-				</>
+				</div>
 			)}
 		</>
 	);

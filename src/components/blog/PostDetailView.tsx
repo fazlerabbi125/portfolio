@@ -21,7 +21,7 @@ import {
 	WhatsappIcon,
 	WhatsappShareButton,
 } from "react-share";
-import { deletePost, toggleFavorite } from "@/actions/blog";
+import { deletePost, toggleFavorite } from "@/actions/blog.action";
 import DeleteConfirmDialog from "@/components/blog/DeleteConfirmDialog";
 import PostModal from "@/components/blog/PostModal";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +36,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/toast";
 import { USER_ROLES } from "@/lib/constants";
 import type { SessionData } from "@/lib/session";
 import "./PostList.css";
@@ -77,6 +78,7 @@ export default function PostDetailView({
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [favorited, setFavorited] = useState(isFavorited);
 	const [resolvedShareUrl, setResolvedShareUrl] = useState(shareUrl);
 
@@ -104,10 +106,11 @@ export default function PostDetailView({
 		setIsDeleting(false);
 
 		if (result.ok) {
+			toast.add({ type: "success", description: result.message });
 			router.push("/blog");
 			router.refresh();
 		} else {
-			alert(result.message);
+			setDeleteError(result.message);
 		}
 	};
 
@@ -115,6 +118,8 @@ export default function PostDetailView({
 		const result = await toggleFavorite(post.id);
 		if (result.ok) {
 			setFavorited(result.favorited);
+		} else {
+			toast.add({ type: "error", description: result.message });
 		}
 	};
 
@@ -261,20 +266,24 @@ export default function PostDetailView({
 				</div>
 			</header>
 
-			{post.imageURL && (
-				<div className="relative w-full aspect-video max-h-96 rounded-xl overflow-hidden border border-border mb-8 bg-muted">
-					<Image
-						src={post.imageURL}
-						alt={post.title}
-						fill
-						sizes="(max-width: 800px) 100vw, 800px"
-						className="object-cover"
-						unoptimized
-					/>
-				</div>
-			)}
+			<div className="blog-detail__body">
+				{post.imageURL && (
+					<div className="blog-detail__reveal relative w-full aspect-video max-h-96 rounded-xl overflow-hidden border border-border mb-8 bg-muted">
+						<Image
+							src={post.imageURL}
+							alt={post.title}
+							fill
+							sizes="(max-width: 800px) 100vw, 800px"
+							className="object-cover"
+							unoptimized
+						/>
+					</div>
+				)}
 
-			<section className="blog-detail__content">{post.content}</section>
+				<section className="blog-detail__content blog-detail__reveal">
+					{post.content}
+				</section>
+			</div>
 
 			{isAdmin && (
 				<>
@@ -286,9 +295,13 @@ export default function PostDetailView({
 					/>
 					<DeleteConfirmDialog
 						open={isDeleteDialogOpen}
-						onOpenChange={setIsDeleteDialogOpen}
+						onOpenChange={(open) => {
+							setIsDeleteDialogOpen(open);
+							if (!open) setDeleteError(null);
+						}}
 						title={`Delete "${post.title}"?`}
 						description="This article will be permanently removed. This action cannot be undone."
+						error={deleteError}
 						onConfirm={handleDelete}
 						isDeleting={isDeleting}
 					/>

@@ -16,8 +16,23 @@ import {
 import pictures from "@/data/pictures.json";
 import "./Gallery.css";
 
+function PicturePreview({
+	picture,
+}: Readonly<{ picture: (typeof pictures)[number] }>) {
+	return (
+		<Image
+			className="block"
+			src={picture.url}
+			alt={picture.title}
+			width={800}
+			height={600}
+			sizes="(max-width: 700px) 100vw, 33vw"
+			loading="lazy"
+		/>
+	);
+}
+
 export default function PictureGrid() {
-	const [visibleCount, setVisibleCount] = useState(10);
 	const [selected, setSelected] = useState<(typeof pictures)[number] | null>(
 		null,
 	);
@@ -25,7 +40,7 @@ export default function PictureGrid() {
 	return (
 		<>
 			<div className="gallery-grid">
-				{pictures.slice(0, visibleCount).map((picture) => (
+				{pictures.map((picture) => (
 					<button
 						className="gallery-grid__item"
 						key={picture.title}
@@ -33,30 +48,12 @@ export default function PictureGrid() {
 						onClick={() => setSelected(picture)}
 					>
 						<Card className="portfolio-card">
-							<Image
-								src={picture.url}
-								alt={picture.title}
-								width={800}
-								height={600}
-								sizes="(max-width: 700px) 100vw, 33vw"
-								className="block"
-							/>
+							<PicturePreview picture={picture} />
 							<div className="px-2">{picture.title}</div>
 						</Card>
 					</button>
 				))}
 			</div>
-			{visibleCount < pictures.length && (
-				<div className="gallery-load-more">
-					<Button
-						onClick={() =>
-							setVisibleCount((count) => Math.min(count + 10, pictures.length))
-						}
-					>
-						Load more pictures
-					</Button>
-				</div>
-			)}
 			<Dialog
 				open={selected !== null}
 				onOpenChange={(open) => !open && setSelected(null)}
@@ -78,6 +75,7 @@ export default function PictureGrid() {
 							width={1600}
 							height={1200}
 							sizes="(max-width: 700px) 100vw, 760px"
+							loading="lazy"
 						/>
 					)}
 					<DialogFooter>

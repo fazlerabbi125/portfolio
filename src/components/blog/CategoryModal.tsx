@@ -5,7 +5,11 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { createCategory, deleteCategory, updateCategory } from "@/actions/blog";
+import {
+	createCategory,
+	deleteCategory,
+	updateCategory,
+} from "@/actions/blog.action";
 import DeleteConfirmDialog from "@/components/blog/DeleteConfirmDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +19,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/toast";
 import { type CategoryInput, categorySchema } from "@/schemas/blog.schema";
 
 interface Category {
@@ -52,7 +57,6 @@ export default function CategoryModal({
 		register,
 		handleSubmit,
 		reset,
-		watch,
 		formState: { errors },
 	} = useForm<CategoryInput>({
 		resolver: zodResolver(categorySchema),
@@ -86,11 +90,10 @@ export default function CategoryModal({
 		setIsSubmitting(false);
 
 		if (result.ok) {
-			setMessage({ text: result.message, ok: true });
+			toast.add({ type: "success", description: result.message });
 			reset(emptyCategory);
 			setEditingCategory(null);
-			reset(emptyCategory);
-			watch("name");
+			router.refresh();
 		} else {
 			setMessage({ text: result.message, ok: false });
 		}
@@ -104,7 +107,7 @@ export default function CategoryModal({
 		setDeletingCategory(null);
 
 		if (result.ok) {
-			setMessage({ text: result.message, ok: true });
+			toast.add({ type: "success", description: result.message });
 			router.refresh();
 		} else {
 			setMessage({ text: result.message, ok: false });

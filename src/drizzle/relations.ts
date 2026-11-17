@@ -40,3 +40,5 @@ export const relations = defineRelations(schema, (r) => ({
 		}),
 	},
 }));
+
+export type DatabaseRelations = typeof relations;

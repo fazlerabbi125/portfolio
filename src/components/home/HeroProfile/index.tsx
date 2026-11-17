@@ -7,13 +7,17 @@ export default function HeroProfile() {
 	return (
 		<section className="hero-section rounded-md py-7 px-6 mt-5">
 			<div className="hero-section__content">
-				<div className="text-[20px] italic font-semibold mb-1">Hello I'm</div>
-				<h1 className="text-3xl font-bold">Fazle Rabbi Faiyaz</h1>
-				<div className="text-[18px] mt-3 text-pretty">
+				<div className="hero-section__greeting text-[20px] italic font-semibold mb-1">
+					Hello I'm
+				</div>
+				<h1 className="hero-section__name text-3xl font-bold">
+					Fazle Rabbi Faiyaz
+				</h1>
+				<div className="hero-section__description text-[18px] mt-3 text-pretty">
 					Full-stack developer with 4+ years of professional experience building
 					software solutions to complex problems with modern web technologies.
 				</div>
-				<div className="mt-5 flex flex-wrap items-center gap-3">
+				<div className="hero-section__actions mt-5 flex flex-wrap items-center gap-3">
 					<Link
 						href="/contact"
 						className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground"
@@ -24,7 +28,7 @@ export default function HeroProfile() {
 						href={SITE.resumeUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white"
+						className="rounded-md bg-foreground px-4 py-2 font-medium text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 					>
 						View Resume
 					</a>

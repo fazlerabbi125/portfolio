@@ -15,6 +15,7 @@ interface DeleteConfirmDialogProps {
 	onOpenChange: (open: boolean) => void;
 	title: string;
 	description?: string;
+	error?: string | null;
 	onConfirm: () => void | Promise<void>;
 	isDeleting?: boolean;
 }
@@ -24,6 +25,7 @@ export default function DeleteConfirmDialog({
 	onOpenChange,
 	title,
 	description = "This action cannot be undone. Are you sure you want to proceed?",
+	error,
 	onConfirm,
 	isDeleting = false,
 }: DeleteConfirmDialogProps) {
@@ -34,6 +36,14 @@ export default function DeleteConfirmDialog({
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
+				{error && (
+					<p
+						className="rounded-md bg-destructive/10 p-3 text-sm font-medium text-destructive"
+						aria-live="polite"
+					>
+						{error}
+					</p>
+				)}
 				<DialogFooter>
 					<Button
 						variant="outline"

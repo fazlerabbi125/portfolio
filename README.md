@@ -1,104 +1,104 @@
-# Fazle Rabbi Faiyaz — Portfolio
+# Fazle Rabbi Faiyaz — Digital Portfolio
 
-A full-stack personal portfolio built with Next.js 16 (App Router), React 19, TypeScript, Drizzle ORM, PostgreSQL, and Base UI / Tailwind CSS.
+[![Validate and deploy](https://github.com/fazlerabbi125/portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/fazlerabbi125/portfolio/actions/workflows/ci.yml)
 
-## About the Project
+A full-stack portfolio created for CS5709 Software Engineering Evolution. The application uses Next.js App Router, React, TypeScript, Drizzle ORM, PostgreSQL, Tailwind CSS, and Base UI.
 
-A full-stack personal portfolio platform with blogging capabilities. It combines a static content layer (profile, about, education, work experience, photo and video galleries) with a dynamic blogging featured backed by PostgreSQL — covering session authentication, role-based authorization, marking posts as favorite, and searching and pagination.
+## Project scope
 
-## Key Features
+The portfolio presents professional information and media while providing a database-backed blog. It separates the static public portfolio from authenticated blog administration and user favourites.
 
-- **Home (`/`)**: Hero profile with resume view, contact link, and links to GitHub/LinkedIn, plus a card grid for quick navigation.
-- **About (`/about`)**: Biography, skills and technologies grouped by category, framework proficiencies, and certifications`.
-- **Education (`/education`)**: Chronological academic timeline.
-- **Work Experience (`/work-experience`)**: Career timeline.
-- **Galleries**:
-  - **Pictures (`/gallery/pictures`)**: Responsive photo grid
-  - **Videos (`/gallery/videos`)**: Playlist-driven gallery with a single active video player.
-- **Blog (`/blog`, `/blog/[id]`, `/blog/favorites`)**:
-  - **Authentication**: Session-based auth via `iron-session` with Argon2 password hashing. Admins are seeded through a script; visitors can register or log in from a tabbed dialog.
-  - **Role-Based Access**: Two roles — `admin` and `user`. Admins get full CRUD over posts and categories; users can favorite posts; all posts are publicly readable.
-  - **Post Management**: CRUD pushs as an admin in a single reused dialog with guarded deletes.
-  - **Favorites**: User with role `user` can be mark a post as favorite.
-- **Contact (`/contact`)**: Validated contact form that delivers submissions through the Resend API.
+- Public visitors and recruiters can review the profile, education, experience, galleries, blog posts, and contact form.
+- Blog readers can search and filter posts, register, sign in, and manage favourites.
+- Administrators can manage posts and categories through protected controls.
 
-## Project Structure
+Light theme is the default. A selected dark theme is stored in an `app-theme` cookie so the server renders the correct colour tokens before the first paint.
 
-```text
-portfolio/
-├── src/
-│   ├── actions/                  # Next.js Server Actions
-│   │   ├── auth/                 # Consolidated authentication actions (login, register, logout)
-│   │   ├── blog/                 # Blog post and category CRUD & search queries
-│   │   └── contact/              # Contact form email delivery actions
-│   ├── app/                      # Next.js App Router pages and layouts
-│   │   ├── about/                # About page
-│   │   ├── blog/                 # Blog list and search
-│   │   │   ├── [id]/             # Dynamic post detail page
-│   │   │   └── favorites/        # Signed-in user's favorited posts
-│   │   ├── contact/              # Contact form page
-│   │   ├── education/            # Education background page
-│   │   ├── gallery/              # Media galleries
-│   │   │   ├── pictures/         # Photo grid with lightbox and "Load more"
-│   │   │   └── videos/           # Video playlist gallery
-│   │   ├── work-experience/      # Career and experience timeline
-│   │   ├── layout.tsx            # Global root layout with AppHeader and AppFooter
-│   │   └── page.tsx              # Home / profile landing page
-│   ├── components/               # React UI components
-│   │   ├── blog/                 # PostCard, PostList, AuthTabs, LoginForm, RegistrationForm, PostModal, CategoryModal, SearchBar
-│   │   ├── common/               # AppLayout, AppHeader, AppFooter
-│   │   ├── contact/              # ContactForm
-│   │   ├── home/                 # ProfileHeader, NavigationGrid
-│   │   └── ui/                   # Reusable primitive UI components (Button, Dialog, Card, Badge)
-│   ├── drizzle/                  # Drizzle ORM configuration & database schemas
-│   │   ├── migrations/           # SQL migration files
-│   │   ├── seed/                 # Database seed scripts (admin user creation)
-│   │   ├── db.ts                 # Database pool connection instance
-│   │   ├── relations.ts          # Relational definitions
-│   │   └── schema.ts             # Tables: users, categories, posts, userFavorites
-│   ├── data/                     # Static JSON content: about, education, experience, videos
-│   ├── lib/                      # Core helpers, constants, session management
-│   │   ├── constants.ts          # App configuration, links, and navigation
-│   │   ├── session.ts            # Typed iron-session configuration and auth helpers
-│   │   └── utils.ts              # General utilities
-│   └── schemas/                  # Zod validation schemas
-│       ├── auth.schema.ts        # Login & registration schemas
-│       ├── blog.schema.ts        # Post & category schemas
-│       └── contact.schema.ts     # Contact form schema
-├── drizzle.config.ts             # Drizzle Kit migration configuration
-├── next.config.ts                # Next.js configuration
-├── package.json                  # Dependencies and build scripts
-└── tsconfig.json                 # TypeScript compiler configuration
+## Features
+
+- Responsive home, about, education, work-experience, contact, photo, and video pages.
+- Education and work timelines with dates to the left of the timeline marker.
+- A 72-item picture gallery: 22 existing records and 50 supplied mock-image records. Every thumbnail and lightbox image is lazy loaded.
+- CSS view-timeline picture-card reveals, with a visible non-animated fallback where the feature is unavailable.
+- Video gallery with reusable pagination controls.
+- Dynamic blog backed by PostgreSQL: public reading, combined search/category filtering, detail views, and observer-driven infinite scrolling for the blog and favourites.
+- Session authentication with Argon2 password hashing, role checks, profile editing, password change, and favourites.
+- Validated contact delivery through Resend.
+- GSAP ScrollTrigger staggered reveals for portfolio timeline, skills, and certification content.
+- Jest component/page smoke tests, Biome, TypeScript checks, and GitHub Actions validation/deployment.
+
+## Routes
+
+| Route file | URL | Responsibility |
+| --- | --- | --- |
+| `src/app/layout.tsx` | All routes | Defines root metadata, font/theme setup, toaster, and shared application layout. |
+| `src/app/page.tsx` | `/` | Renders the profile hero and navigation cards. |
+| `src/app/about/page.tsx` | `/about` | Renders biography, skills, technology proficiency, and certifications from static data. |
+| `src/app/education/page.tsx` | `/education` | Renders the academic timeline from static data. |
+| `src/app/work-experience/page.tsx` | `/work-experience` | Renders the professional-experience timeline from static data. |
+| `src/app/contact/page.tsx` | `/contact` | Hosts the validated contact form. |
+| `src/app/gallery/pictures/page.tsx` | `/gallery/pictures` | Loads picture data and renders the responsive lazy-loaded gallery. |
+| `src/app/gallery/videos/page.tsx` | `/gallery/videos` | Loads video data and renders the paginated video gallery. |
+| `src/app/blog/page.tsx` | `/blog` | Fetches initial posts/categories and renders the filterable infinite blog list. |
+| `src/app/blog/[id]/page.tsx` | `/blog/:id` | Loads and renders one blog post, its optional image, and its actions. |
+| `src/app/blog/favorites/page.tsx` | `/blog/favorites` | Loads the signed-in user's initial favourites list. |
+
+## Source structure
+
+| Directory | Responsibility |
+| --- | --- |
+| `src/actions` | Server Actions for authentication, blog mutations/favourites, and contact email. These validate input and enforce permissions before writes. |
+| `src/app` | App Router pages, layouts, metadata, and global semantic theme styles. |
+| `src/components` | Presentation and interactive UI, grouped by feature (`blog`, `gallery`, `home`, `contact`, `common`) plus reusable `ui` primitives. |
+| `src/data` | Versioned static JSON content for profile, timelines, and galleries. |
+| `src/drizzle` | Database client, schema, relations, migrations, and repeatable seed scripts. |
+| `src/hooks` | Client-side reusable behaviour, currently including infinite-scroll observation. |
+| `src/lib` | Cross-cutting utilities, constants, and session configuration. |
+| `src/queries` | Read-only database queries used by Server Components and Server Actions. |
+| `src/schemas` | Zod validation schemas shared by forms and server-side operations. |
+| `src/types` | Shared TypeScript contracts used across data, actions, and presentation components. |
+| `__tests__` | Jest tests for database-independent pages and reusable UI behaviour. |
+| `docs` | Assessment report, report outline, and supporting academic evidence. |
+| `.github/workflows` | Pull-request validation and `main` deployment workflow. |
+
+## Architecture
+
+Server Components read static content and database queries. Client Components own interaction such as dialogs, filtering, infinite scrolling, and theme switching. Server Actions are the write boundary: they validate with Zod, obtain the session, check roles where needed, and then use Drizzle to update PostgreSQL.
+
+```mermaid
+flowchart LR
+    Browser[React client components] --> Pages[App Router server pages]
+    Browser --> Actions[Server Actions]
+    Pages --> Queries[Read-only queries]
+    Actions --> Schemas[Zod schemas]
+    Actions --> Session[iron-session]
+    Queries --> DB[Drizzle / PostgreSQL]
+    Actions --> DB
+    Actions --> Email[Resend]
+    Pages --> JSON[Static JSON data]
 ```
 
 ## Setup
 
-### Prerequisites
+### Requirements
 
-- **Node.js**: `v20.x` or higher
-- **Package Manager**: `pnpm` (the project pins `pnpm@12.5.1`); `npm` and `yarn` also work
-- **PostgreSQL 15+**: Any Postgres instance — local, Neon, Supabase, or Vercel Postgres
-- **Native toolchain**: `argon2` is a native module; its build script is allowlisted in `pnpm-workspace.yaml`, so a prebuilt binary or a working C++ toolchain is required
+- Node.js 22.13.0 or newer
+- pnpm 12.5.1
+- PostgreSQL 15 or newer
+- A working native toolchain if an Argon2 prebuilt binary is unavailable
 
-### 1. Install dependencies
-
-```bash
-pnpm install
-```
-
-### 2. Configure environment variables
-
-Create a `.env` file in the project root based on `.env.example`:
+### Install and configure
 
 ```bash
+pnpm install --frozen-lockfile
 cp .env.example .env
 ```
 
-Ensure the following variables are defined:
+Set the environment variables required by the deployed services:
 
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/portfolio?sslmode=disable"
-SESSION_SECRET="complex_32_character_long_password_secret_here"
+SESSION_SECRET="<generate-a-unique-random-secret-of-at-least-32-characters>"
 ADMIN_EMAIL="admin@example.com"
 ADMIN_PASSWORD="SecureAdminPassword123!"
 ADMIN_NAME="Administrator"
@@ -107,67 +107,61 @@ CONTACT_RECEIVER_EMAIL="your-email@example.com"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-### 3. Apply database migrations
+Generate a unique session secret with `openssl rand -base64 32`; do not reuse
+the placeholder value.
 
-Drizzle Kit applies the committed SQL migrations in `src/drizzle/migrations/`:
+Apply the database schema and seed the administrator:
 
 ```bash
 pnpm db:migrate
-```
-
-When you change `src/drizzle/schema.ts`, generate a new migration first:
-
-```bash
-pnpm db:generate
-```
-
-### 4. Seed the administrator account
-
-Admins are never created through the UI — the registration action always assigns the `user` role. Seed the admin with:
-
-```bash
 pnpm db:seed src/drizzle/seed/user.seed.ts
-```
-
-The script is idempotent: it skips insertion if a user with `ADMIN_EMAIL` already exists.
-
-Optionally, seed sample blog content. Note that this script does **not** load `.env` itself, so `DATABASE_URL` must already be exported in your shell:
-
-```bash
-pnpm db:seed src/drizzle/seed/post.seed.ts
-```
-
-### 5. Run the development server
-
-```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+`register()` always creates a `user`; the seeded account is the only route to an `admin` role. When the schema changes, run `pnpm db:generate` before migrating.
 
-### Scripts
+## Scripts
 
-| Script | Description |
+| Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Start the Next.js development server |
-| `pnpm build` | Production build (runs TypeScript checks via Next.js) |
-| `pnpm start` | Serve the production build |
-| `pnpm lint` | Run Biome checks across the project |
-| `pnpm format` | Format files with Biome |
-| `pnpm db:generate` | Generate a SQL migration from schema changes |
-| `pnpm db:migrate` | Apply pending migrations to the target database |
-| `pnpm db:seed <file>` | Run a seed script through `tsx` (the file argument is required) |
-| `pnpm prepare` | Husky install hook, invoked automatically on install |
+| `pnpm dev` | Start the development server. |
+| `pnpm build` | Produce the production build. |
+| `pnpm start` | Serve the production build. |
+| `pnpm lint` | Run Biome checks. |
+| `pnpm format` | Apply Biome formatting. |
+| `pnpm test` | Run the Jest suite once. |
+| `pnpm test:watch` | Run Jest in watch mode. |
+| `pnpm db:generate` | Generate a migration from schema changes. |
+| `pnpm db:migrate` | Apply pending migrations. |
+| `pnpm db:seed <file>` | Execute a seed script with `tsx`. |
 
-### Tech Stack
+## Testing and accessibility
 
-- **Framework**: Next.js 16 (App Router) with React 19 and the React Compiler enabled
-- **Language**: TypeScript
-- **Database**: PostgreSQL via `pg` and Drizzle ORM
-- **Auth**: `iron-session` cookies with Argon2 password hashing
-- **Validation**: Zod schemas shared between Server Actions and React Hook Form
-- **UI**: Base UI primitives in shadcn/ui
-- **Linting**: Biome (linter and formatter)
-- **Email**: Email configuration via Resend for contact page.
-- **Video**: `@videojs/react` with the YouTube IFrame player tech
+Jest uses `next/jest`, jsdom, Testing Library, and `jest-dom`. The current tests deliberately cover only synchronous, database-independent route composition and the shared search input; database/authentication workflows need an isolated test database and remain a planned integration-test extension.
 
+Manual acceptance checks cover phone, tablet, laptop, and desktop layouts; keyboard focus; semantic labels; visible control states; filter/reset behaviour; theme persistence; and lazy gallery images. The design uses semantic CSS tokens, rather than `prefers-color-scheme`, and does not use colour as the only indicator of state.
+
+### Documentation conventions
+
+The codebase uses concise JSDoc for public server actions, queries, session and utility functions, route functions, shared contracts, and tests. Comments are reserved for non-obvious security checks, query behaviour, and asynchronous safeguards; self-explanatory presentation code is kept clear through feature-based structure and descriptive names.
+
+## Continuous integration and deployment
+
+GitHub stores the source repository and GitHub Actions runs on every pull request and on `main` pushes:
+
+1. frozen dependency install;
+2. Biome;
+3. TypeScript with `tsc --noEmit`;
+4. Jest;
+5. production build.
+
+After a successful `main` validation, the deploy job builds and deploys the Vercel production artifact. The live portfolio is hosted on [Vercel](https://portfolio-phi-red-18.vercel.app/). Configure `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as GitHub secrets. Keep `DATABASE_URL`, `SESSION_SECRET`, and Resend credentials in Vercel environment variables, never in the repository.
+
+## Technology choices
+
+- Next.js 16 App Router, React 19, and TypeScript
+- PostgreSQL, Drizzle ORM, and Drizzle Kit
+- iron-session, Argon2, Zod, React Hook Form
+- Tailwind CSS, Base UI, Lucide, and semantic CSS custom properties
+- GSAP ScrollTrigger, CSS scroll-driven animations, and Next Image
+- Resend, Biome, Jest, Testing Library, and GitHub Actions

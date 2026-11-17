@@ -1,3 +1,4 @@
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
 	index,
 	integer,
@@ -110,3 +111,22 @@ export const userFavorites = pgTable(
 		index("favorites_post_id_idx").on(table.postId),
 	],
 );
+
+export type DatabaseSchema = {
+	users: typeof users;
+	categories: typeof categories;
+	posts: typeof posts;
+	postCategories: typeof postCategories;
+	userFavorites: typeof userFavorites;
+};
+
+export type User = InferSelectModel<typeof users>;
+export type NewUser = InferInsertModel<typeof users>;
+export type Category = InferSelectModel<typeof categories>;
+export type NewCategory = InferInsertModel<typeof categories>;
+export type Post = InferSelectModel<typeof posts>;
+export type NewPost = InferInsertModel<typeof posts>;
+export type PostCategory = InferSelectModel<typeof postCategories>;
+export type NewPostCategory = InferInsertModel<typeof postCategories>;
+export type UserFavorite = InferSelectModel<typeof userFavorites>;
+export type NewUserFavorite = InferInsertModel<typeof userFavorites>;

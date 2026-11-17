@@ -27,3 +27,44 @@
 	object-fit: cover;
 	object-position: bottom center;
 }
+
+@media (width < 640px) {
+	.hero-section {
+		min-width: 0;
+		display: grid;
+		grid-template-areas:
+			"greeting"
+			"name"
+			"image"
+			"description"
+			"actions";
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 0.75rem;
+	}
+
+	.hero-section__content {
+		display: contents;
+	}
+
+	.hero-section__greeting {
+		grid-area: greeting;
+	}
+
+	.hero-section__name {
+		grid-area: name;
+	}
+
+	.hero-section__description {
+		grid-area: description;
+	}
+
+	.hero-section__actions {
+		grid-area: actions;
+	}
+
+	.hero-section__image-container {
+		grid-area: image;
+		width: min(100%, 32rem);
+		justify-self: center;
+	}
+}

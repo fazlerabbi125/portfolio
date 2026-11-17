@@ -5,6 +5,7 @@
 	--foreground: #182033;
 	--surface: #fff;
 	--muted: #65708a;
+	--hover: #e9edf5;
 	--primary: #0284c7;
 	--primary-foreground: #fff;
 	--soft: #ccfbf1;
@@ -21,6 +22,7 @@
 	--muted-foreground: #65708a;
 	--ring: #0f766e;
 	--radius: 0.75rem;
+	--radius-md: calc(var(--radius) - 2px);
 	--tertiary: #38bdf8;
 	--tertiary-foreground: #10131d;
 }
@@ -30,6 +32,7 @@
 	--foreground: #edf0f8;
 	--surface: #191e2c;
 	--muted: #a9b2c8;
+	--hover: #242b3c;
 	--primary: #5eead4;
 	--primary-foreground: #042f2e;
 	--soft: #134e4a;
@@ -58,6 +61,7 @@
 	--color-popover: var(--popover);
 	--color-popover-foreground: var(--popover-foreground);
 	--color-muted-foreground: var(--muted-foreground);
+	--color-muted: var(--hover);
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-border: var(--border);
@@ -68,7 +72,28 @@
 	--breakpoint-desktop: 1024px;
 	--color-destructive: var(--color-red-600);
 	--color-tertiary: var(--tertiary);
+}
 
+.theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	padding: 0;
+	border: 1px solid var(--border);
+	border-radius: 9999px;
+	background: var(--surface);
+	color: var(--foreground);
+}
+
+.theme-toggle:hover {
+	background: var(--hover);
+}
+
+.theme-toggle:focus-visible {
+	outline: 2px solid var(--ring);
+	outline-offset: 2px;
 }
 
 * {
@@ -110,15 +135,15 @@ input:focus-visible {
 
 .timeline {
 	position: relative;
-	margin-left: clamp(5.5rem, 17vw, 10rem);
-	padding-left: 2.5rem;
+	margin-left: clamp(5rem, 17vw, 10rem);
+	padding-left: clamp(2rem, 4vw, 2.5rem);
 }
 
 .timeline::before {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	left: 1rem;
+	left: clamp(0.75rem, 1.8vw, 1rem);
 	width: 2px;
 	content: "";
 	background: var(--primary);
@@ -132,7 +157,7 @@ input:focus-visible {
 .timeline-item::before {
 	position: absolute;
 	top: 1.5rem;
-	left: -2rem;
+	left: clamp(-2rem, -4vw, -1.75rem);
 	width: 1rem;
 	height: 1rem;
 	content: "";
@@ -145,9 +170,9 @@ input:focus-visible {
 .timeline-item::after {
 	position: absolute;
 	top: 1.375rem;
-	right: calc(100% + 3rem);
+	right: calc(100% + clamp(1.75rem, 5vw, 3rem));
 	width: max-content;
-	max-width: 11rem;
+	max-width: clamp(4.5rem, 14vw, 11rem);
 	content: attr(data-date, "Jan 2000");
 	color: var(--muted-foreground);
 	font-size: 0.875rem;
@@ -155,26 +180,6 @@ input:focus-visible {
 	line-height: 1.25rem;
 	text-align: right;
 	text-wrap: balance;
-}
-
-@media (max-width: 480px) {
-	.timeline {
-		margin-left: 5rem;
-		padding-left: 2rem;
-	}
-
-	.timeline::before {
-		left: 0.75rem;
-	}
-
-	.timeline-item::before {
-		left: -1.75rem;
-	}
-
-	.timeline-item::after {
-		right: calc(100% + 1.75rem);
-		max-width: 4.5rem;
-	}
 }
 
 .error {

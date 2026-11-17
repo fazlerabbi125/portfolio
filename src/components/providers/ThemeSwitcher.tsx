@@ -4,12 +4,11 @@ import {
 	type PropsWithChildren,
 	useCallback,
 	useContext,
-	useEffect,
 	useMemo,
 	useState,
 } from "react";
 
-const darkModeKey = "isDark";
+const themeCookieName = "app-theme";
 
 export const ThemeContext = createContext<null | {
 	darkMode: boolean;
@@ -18,16 +17,18 @@ export const ThemeContext = createContext<null | {
 
 export default function ThemeSwitcher({
 	children,
-}: Readonly<PropsWithChildren>) {
-	const [darkMode, setDarkMode] = useState(false);
-
-	useEffect(() => {
-		setDarkMode(document.documentElement.dataset.appTheme === "dark");
-	}, []);
+	inDarkMode = false,
+}: Readonly<PropsWithChildren<{ inDarkMode?: boolean }>>) {
+	const [darkMode, setDarkMode] = useState(inDarkMode);
 
 	const darkModeActivation = useCallback((newTheme: boolean) => {
-		document.documentElement.dataset.appTheme = newTheme ? "dark" : "";
-		localStorage.setItem(darkModeKey, String(newTheme));
+		if (newTheme) {
+			document.documentElement.dataset.appTheme = "dark";
+		} else {
+			delete document.documentElement.dataset.appTheme;
+		}
+		// biome-ignore lint/suspicious/noDocumentCookie: The next server render needs this preference.
+		document.cookie = `${themeCookieName}=${newTheme ? "dark" : "light"}; Path=/; Max-Age=31536000; SameSite=Lax`;
 		setDarkMode(newTheme);
 	}, []);
 

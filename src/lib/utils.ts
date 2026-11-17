@@ -10,11 +10,13 @@ export class API {
 	private readonly _baseUrl: string;
 	private readonly _timeout: number | undefined;
 
+	/** Creates an API client with an optional base URL and timeout. */
 	constructor({ baseUrl, timeout }: { baseUrl?: string; timeout?: number }) {
 		this._baseUrl = baseUrl || "";
 		this._timeout = timeout;
 	}
 
+	/** Executes an HTTP request with the configured base URL and timeout. */
 	makeRequest = async <T = any>(config: ApiCallConfig) => {
 		let {
 			url,
@@ -100,6 +102,7 @@ export class API {
 	};
 }
 
+/** Reads a required environment value or throws a clear startup error. */
 export function getRequiredEnv(name: string): string {
 	const value = process.env[name];
 
@@ -110,10 +113,12 @@ export function getRequiredEnv(name: string): string {
 	return value;
 }
 
+/** Hashes a password with Argon2. */
 export async function hashPassword(password: string): Promise<string> {
 	return argon2.hash(password);
 }
 
+/** Verifies a plaintext password against an Argon2 hash. */
 export async function verifyPassword(
 	hashedPassword: string,
 	plainPassword: string,

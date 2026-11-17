@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from "react";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentAccount } from "@/queries/account.query";
 import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
 import "./AppLayout.css";
@@ -7,7 +7,7 @@ import "./AppLayout.css";
 export default async function AppLayout({
 	children,
 }: Readonly<PropsWithChildren>) {
-	const currentUser = await getCurrentUser();
+	const currentUser = await getCurrentAccount();
 
 	return (
 		<div className="app-layout">

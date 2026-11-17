@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import AppLayout from "@/components/common/AppLayout";
+import ThemeSwitcher from "@/components/providers/ThemeSwitcher";
 import { Toaster } from "@/components/ui/toast";
-
-// import ThemeSwitcher from "@/components/providers/ThemeSwitcher";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -45,15 +45,23 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function RootLayout({
+/** Renders the document shell with the persisted colour theme. */
+export default async function RootLayout({
 	children,
 }: Readonly<React.PropsWithChildren>) {
+	const theme = (await cookies()).get("app-theme")?.value;
+	const isDarkMode = theme === "dark";
+
 	return (
-		<html lang="en" className={inter.variable}>
+		<html
+			lang="en"
+			className={inter.variable}
+			data-app-theme={isDarkMode ? "dark" : undefined}
+		>
 			<body>
-				{/* <ThemeSwitcher> */}
-				<AppLayout>{children}</AppLayout>
-				{/* </ThemeSwitcher> */}
+				<ThemeSwitcher inDarkMode={isDarkMode}>
+					<AppLayout>{children}</AppLayout>
+				</ThemeSwitcher>
 				<Toaster />
 			</body>
 		</html>
