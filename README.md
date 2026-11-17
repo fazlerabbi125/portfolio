@@ -14,6 +14,17 @@ The portfolio presents professional information and media while providing a data
 
 Light theme is the default. A selected dark theme is stored in an `app-theme` cookie so the server renders the correct colour tokens before the first paint.
 
+## Personas, scenarios, and implemented features
+
+The portfolio's Phase 2 decisions are traced to three representative users and
+their core scenarios:
+
+| Persona | Scenario | Implemented features |
+| --- | --- | --- |
+| Visitor/recruiter | Reviews professional information on a phone and contacts the owner. | Responsive home, about, education, work, gallery, contact, and timeline layouts; accessible navigation and contact form. |
+| Blog reader | Finds a relevant article, saves it, and updates account details. | Combined form-based search/category filtering, observer-driven favourites list, and update-profile/change-password dialogs. |
+| Administrator | Manages blog content without exposing controls to ordinary readers. | Role checks in Server Actions, reusable post/category dialogs, Zod validation schemas, and separated database operations. |
+
 ## Features
 
 - Responsive home, about, education, work-experience, contact, photo, and video pages.
@@ -139,7 +150,7 @@ pnpm dev
 
 Jest uses `next/jest`, jsdom, Testing Library, and `jest-dom`. The current tests deliberately cover only synchronous, database-independent route composition and the shared search input; database/authentication workflows need an isolated test database and remain a planned integration-test extension.
 
-Manual acceptance checks cover phone, tablet, laptop, and desktop layouts; keyboard focus; semantic labels; visible control states; filter/reset behaviour; theme persistence; and lazy gallery images. The design uses semantic CSS tokens, rather than `prefers-color-scheme`, and does not use colour as the only indicator of state.
+Manual acceptance checks cover phone, tablet, laptop, and desktop layouts; keyboard focus; semantic labels; visible control states; filter/reset behaviour; theme persistence; and lazy gallery images.
 
 ### Documentation conventions
 
