@@ -83,34 +83,52 @@ export default function CategoryModal({
 		setIsSubmitting(true);
 		setMessage(null);
 
-		const result = editingCategory
-			? await updateCategory(editingCategory.id, values)
-			: await createCategory(values);
+		try {
+			const result = editingCategory
+				? await updateCategory(editingCategory.id, values)
+				: await createCategory(values);
 
-		setIsSubmitting(false);
-
-		if (result.ok) {
-			toast.add({ type: "success", description: result.message });
-			reset(emptyCategory);
-			setEditingCategory(null);
-			router.refresh();
-		} else {
-			setMessage({ text: result.message, ok: false });
+			if (result.ok) {
+				toast.add({ type: "success", description: result.message });
+				reset(emptyCategory);
+				setEditingCategory(null);
+				router.refresh();
+			} else {
+				setMessage({ text: result.message, ok: false });
+			}
+		} catch {
+			setMessage({
+				text: "Category changes could not be saved. Please try again.",
+				ok: false,
+			});
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
 	const handleDelete = async () => {
 		if (!deletingCategory) return;
 		setIsSubmitting(true);
-		const result = await deleteCategory(deletingCategory.id);
-		setIsSubmitting(false);
-		setDeletingCategory(null);
+		setMessage(null);
 
-		if (result.ok) {
-			toast.add({ type: "success", description: result.message });
-			router.refresh();
-		} else {
-			setMessage({ text: result.message, ok: false });
+		try {
+			const result = await deleteCategory(deletingCategory.id);
+			if (result.ok) {
+				setDeletingCategory(null);
+				toast.add({ type: "success", description: result.message });
+				router.refresh();
+			} else {
+				setDeletingCategory(null);
+				setMessage({ text: result.message, ok: false });
+			}
+		} catch {
+			setDeletingCategory(null);
+			setMessage({
+				text: "Category could not be deleted. Please try again.",
+				ok: false,
+			});
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 

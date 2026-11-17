@@ -1,12 +1,17 @@
 "use server";
 
 import argon2 from "argon2";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { db } from "@/drizzle/db";
 import { users } from "@/drizzle/schema";
 import { USER_ROLES } from "@/lib/constants";
-import { getSession, requireAuth, setSessionInfo } from "@/lib/session";
+import {
+	getSession,
+	requireAuth,
+	type SessionData,
+	setSessionInfo,
+} from "@/lib/session";
 import {
 	type ChangePasswordInput,
 	changePasswordSchema,
@@ -84,10 +89,15 @@ export async function register(
 
 	const hashedPassword = await argon2.hash(password);
 
-	const [newUser] = await db
-		.insert(users)
-		.values({ name, email, hashedPassword, role: USER_ROLES.USER })
-		.returning({ id: users.id, name: users.name, role: users.role });
+	let newUser: SessionData | undefined;
+	try {
+		[newUser] = await db
+			.insert(users)
+			.values({ name, email, hashedPassword, role: USER_ROLES.USER })
+			.returning({ id: users.id, name: users.name, role: users.role });
+	} catch {
+		return { ok: false, message: "Registration failed. Please try again." };
+	}
 
 	if (!newUser) {
 		return { ok: false, message: "Registration failed. Please try again." };
@@ -126,22 +136,37 @@ export async function updateProfile(
 		};
 	}
 
-	const user = await requireAuth();
-	const [existingUser] = await db
-		.select({ id: users.id })
-		.from(users)
-		.where(eq(users.email, parsed.data.email))
-		.limit(1);
-
-	if (existingUser && existingUser.id !== user.id) {
-		return { ok: false, message: "An account with this email already exists." };
+	let user: SessionData;
+	try {
+		user = await requireAuth();
+	} catch {
+		return { ok: false, message: "Please log in to update your profile." };
 	}
 
-	const [updatedUser] = await db
-		.update(users)
-		.set({ name: parsed.data.name, email: parsed.data.email })
-		.where(eq(users.id, user.id))
-		.returning({ name: users.name, email: users.email });
+	let existingUser: { id: string } | undefined;
+	let updatedUser: { name: string; email: string } | undefined;
+	try {
+		[existingUser] = await db
+			.select({ id: users.id })
+			.from(users)
+			.where(eq(users.email, parsed.data.email))
+			.limit(1);
+
+		if (existingUser && existingUser.id !== user.id) {
+			return {
+				ok: false,
+				message: "An account with this email already exists.",
+			};
+		}
+
+		[updatedUser] = await db
+			.update(users)
+			.set({ name: parsed.data.name, email: parsed.data.email })
+			.where(eq(users.id, user.id))
+			.returning({ name: users.name, email: users.email });
+	} catch {
+		return { ok: false, message: "Profile update failed. Please try again." };
+	}
 
 	if (!updatedUser) {
 		return { ok: false, message: "Profile update failed. Please try again." };
@@ -171,12 +196,23 @@ export async function changePassword(
 		};
 	}
 
-	const user = await requireAuth();
-	const [currentUser] = await db
-		.select({ hashedPassword: users.hashedPassword })
-		.from(users)
-		.where(eq(users.id, user.id))
-		.limit(1);
+	let user: SessionData;
+	try {
+		user = await requireAuth();
+	} catch {
+		return { ok: false, message: "Please log in to change your password." };
+	}
+
+	let currentUser: { hashedPassword: string } | undefined;
+	try {
+		[currentUser] = await db
+			.select({ hashedPassword: users.hashedPassword })
+			.from(users)
+			.where(eq(users.id, user.id))
+			.limit(1);
+	} catch {
+		return { ok: false, message: "Password change failed. Please try again." };
+	}
 
 	if (
 		!currentUser ||
@@ -188,10 +224,27 @@ export async function changePassword(
 		return { ok: false, message: "Current password is incorrect." };
 	}
 
-	await db
-		.update(users)
-		.set({ hashedPassword: await argon2.hash(parsed.data.password) })
-		.where(eq(users.id, user.id));
+	try {
+		const [updatedUser] = await db
+			.update(users)
+			.set({ hashedPassword: await argon2.hash(parsed.data.password) })
+			.where(
+				and(
+					eq(users.id, user.id),
+					eq(users.hashedPassword, currentUser.hashedPassword),
+				),
+			)
+			.returning({ id: users.id });
+
+		if (!updatedUser) {
+			return {
+				ok: false,
+				message: "Your password changed in another session. Please try again.",
+			};
+		}
+	} catch {
+		return { ok: false, message: "Password change failed. Please try again." };
+	}
 
 	return { ok: true, message: "Your password has been changed." };
 }

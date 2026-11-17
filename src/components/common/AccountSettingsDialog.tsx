@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type SubmitEvent, useState, useTransition } from "react";
+import {
+	type SubmitEvent,
+	useEffect,
+	useRef,
+	useState,
+	useTransition,
+} from "react";
 import { changePassword, updateProfile } from "@/actions/auth.action";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,22 +40,47 @@ export default function AccountSettingsDialog({
 	const router = useRouter();
 	const [profileName, setProfileName] = useState(name);
 	const [profileEmail, setProfileEmail] = useState(email);
+	const [profileError, setProfileError] = useState<string | null>(null);
+	const [passwordError, setPasswordError] = useState<string | null>(null);
+	const wasProfileOpen = useRef(false);
+	const wasPasswordOpen = useRef(false);
 	const [isPending, startTransition] = useTransition();
+
+	useEffect(() => {
+		if (profileOpen && !wasProfileOpen.current) {
+			setProfileName(name);
+			setProfileEmail(email);
+			setProfileError(null);
+		}
+		wasProfileOpen.current = profileOpen;
+	}, [email, name, profileOpen]);
+
+	useEffect(() => {
+		if (passwordOpen && !wasPasswordOpen.current) {
+			setPasswordError(null);
+		}
+		wasPasswordOpen.current = passwordOpen;
+	}, [passwordOpen]);
 
 	const submitProfile = (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		setProfileError(null);
 		startTransition(async () => {
-			const result = await updateProfile({
-				name: profileName,
-				email: profileEmail,
-			});
-			toast.add({
-				type: result.ok ? "success" : "error",
-				description: result.message,
-			});
-			if (result.ok) {
+			try {
+				const result = await updateProfile({
+					name: profileName,
+					email: profileEmail,
+				});
+				if (!result.ok) {
+					setProfileError(result.message);
+					return;
+				}
+
+				toast.add({ type: "success", description: result.message });
 				onProfileOpenChange(false);
 				router.refresh();
+			} catch {
+				setProfileError("Your profile could not be updated. Please try again.");
 			}
 		});
 	};
@@ -58,19 +89,26 @@ export default function AccountSettingsDialog({
 		event.preventDefault();
 		const form = event.currentTarget;
 		const formData = new FormData(form);
+		setPasswordError(null);
 		startTransition(async () => {
-			const result = await changePassword({
-				currentPassword: String(formData.get("currentPassword") ?? ""),
-				password: String(formData.get("password") ?? ""),
-				confirmPassword: String(formData.get("confirmPassword") ?? ""),
-			});
-			toast.add({
-				type: result.ok ? "success" : "error",
-				description: result.message,
-			});
-			if (result.ok) {
+			try {
+				const result = await changePassword({
+					currentPassword: String(formData.get("currentPassword") ?? ""),
+					password: String(formData.get("password") ?? ""),
+					confirmPassword: String(formData.get("confirmPassword") ?? ""),
+				});
+				if (!result.ok) {
+					setPasswordError(result.message);
+					return;
+				}
+
+				toast.add({ type: "success", description: result.message });
 				form.reset();
 				onPasswordOpenChange(false);
+			} catch {
+				setPasswordError(
+					"Your password could not be changed. Please try again.",
+				);
 			}
 		});
 	};
@@ -85,6 +123,14 @@ export default function AccountSettingsDialog({
 							Change the name and email associated with your account.
 						</DialogDescription>
 					</DialogHeader>
+					{profileError && (
+						<p
+							className="rounded-md bg-destructive/10 p-3 text-sm font-medium text-destructive"
+							role="alert"
+						>
+							{profileError}
+						</p>
+					)}
 					<form className="space-y-4" onSubmit={submitProfile}>
 						<label className="grid gap-1.5 font-medium" htmlFor="profile-name">
 							Name
@@ -126,6 +172,14 @@ export default function AccountSettingsDialog({
 							Your current password is required to continue.
 						</DialogDescription>
 					</DialogHeader>
+					{passwordError && (
+						<p
+							className="rounded-md bg-destructive/10 p-3 text-sm font-medium text-destructive"
+							role="alert"
+						>
+							{passwordError}
+						</p>
+					)}
 					<form className="space-y-4" onSubmit={submitPassword}>
 						{[
 							["currentPassword", "Current password"],

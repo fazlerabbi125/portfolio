@@ -17,13 +17,20 @@ export async function sendEmail(input: {
 			message: "Email delivery has not been configured yet.",
 		};
 	try {
-		await new Resend(key).emails.send({
+		const { error } = await new Resend(key).emails.send({
 			from: "Portfolio contact <onboarding@resend.dev>", // add prompt regarding this
 			to: recipient,
 			replyTo: input.email,
 			subject: input.subject,
 			text: `From: ${input.name} <${input.email}>\n\n${input.message}`,
 		});
+		if (error) {
+			return {
+				ok: false,
+				message: "Your message could not be sent. Please try again later.",
+			};
+		}
+
 		return { ok: true, message: "Your message has been sent." };
 	} catch {
 		return {

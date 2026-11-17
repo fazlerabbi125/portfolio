@@ -19,7 +19,9 @@ export default async function FavoritesPage({
 
 	const resolvedSearchParams = await searchParams;
 	const search = resolvedSearchParams.search || "";
-	const categoryId = Number(resolvedSearchParams.category) || undefined;
+	const category = resolvedSearchParams.category;
+	const categoryId =
+		category && /^[1-9]\d*$/.test(category) ? Number(category) : undefined;
 
 	const [{ posts, total, totalPages, currentPage }, categories] =
 		await Promise.all([

@@ -102,24 +102,36 @@ export default function PostDetailView({
 
 	const handleDelete = async () => {
 		setIsDeleting(true);
-		const result = await deletePost(post.id);
-		setIsDeleting(false);
-
-		if (result.ok) {
-			toast.add({ type: "success", description: result.message });
-			router.push("/blog");
-			router.refresh();
-		} else {
-			setDeleteError(result.message);
+		setDeleteError(null);
+		try {
+			const result = await deletePost(post.id);
+			if (result.ok) {
+				toast.add({ type: "success", description: result.message });
+				router.push("/blog");
+				router.refresh();
+			} else {
+				setDeleteError(result.message);
+			}
+		} catch {
+			setDeleteError("The post could not be deleted. Please try again.");
+		} finally {
+			setIsDeleting(false);
 		}
 	};
 
 	const handleFavorite = async () => {
-		const result = await toggleFavorite(post.id);
-		if (result.ok) {
-			setFavorited(result.favorited);
-		} else {
-			toast.add({ type: "error", description: result.message });
+		try {
+			const result = await toggleFavorite(post.id);
+			if (result.ok) {
+				setFavorited(result.favorited);
+			} else {
+				toast.add({ type: "error", description: result.message });
+			}
+		} catch {
+			toast.add({
+				type: "error",
+				description: "Favorites could not be updated. Please try again.",
+			});
 		}
 	};
 

@@ -7,6 +7,7 @@ const config: Config = {
 	coverageProvider: "v8",
 	moduleNameMapper: {
 		"^@/(.*)$": "<rootDir>/src/$1",
+		"^server-only$": "<rootDir>/__mocks__/server-only.ts",
 	},
 	setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 	testEnvironment: "jsdom",

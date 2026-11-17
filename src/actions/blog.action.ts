@@ -33,6 +33,13 @@ export async function getPosts({
 	page?: number;
 	search?: string;
 }): Promise<PaginatedPosts> {
+	const requestedCategoryId = categoryId ?? Number.NaN;
+	const validCategoryId =
+		Number.isSafeInteger(requestedCategoryId) &&
+		requestedCategoryId > 0 &&
+		requestedCategoryId <= 2_147_483_647
+			? requestedCategoryId
+			: undefined;
 	const trimmedSearch = search.trim();
 	const searchFilter = trimmedSearch
 		? or(
@@ -40,7 +47,7 @@ export async function getPosts({
 				ilike(posts.content, `%${trimmedSearch}%`),
 			)
 		: undefined;
-	const categoryFilter = categoryId
+	const categoryFilter = validCategoryId
 		? exists(
 				db
 					.select({ id: postCategories.postId })
@@ -48,7 +55,7 @@ export async function getPosts({
 					.where(
 						and(
 							eq(postCategories.postId, posts.id),
-							eq(postCategories.categoryId, categoryId),
+							eq(postCategories.categoryId, validCategoryId),
 						),
 					),
 			)
@@ -98,6 +105,13 @@ export async function getFavoritePosts({
 	search?: string;
 }): Promise<PaginatedPosts> {
 	const user = await requireAuth();
+	const requestedCategoryId = categoryId ?? Number.NaN;
+	const validCategoryId =
+		Number.isSafeInteger(requestedCategoryId) &&
+		requestedCategoryId > 0 &&
+		requestedCategoryId <= 2_147_483_647
+			? requestedCategoryId
+			: undefined;
 	const offset = (page - 1) * POSTS_PER_PAGE;
 	const trimmedSearch = search.trim();
 	const searchFilter = trimmedSearch
@@ -106,7 +120,7 @@ export async function getFavoritePosts({
 				ilike(posts.content, `%${trimmedSearch}%`),
 			)
 		: undefined;
-	const categoryFilter = categoryId
+	const categoryFilter = validCategoryId
 		? exists(
 				db
 					.select({ id: postCategories.postId })
@@ -114,7 +128,7 @@ export async function getFavoritePosts({
 					.where(
 						and(
 							eq(postCategories.postId, posts.id),
-							eq(postCategories.categoryId, categoryId),
+							eq(postCategories.categoryId, validCategoryId),
 						),
 					),
 			)

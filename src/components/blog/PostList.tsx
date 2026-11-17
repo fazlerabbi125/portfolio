@@ -49,12 +49,19 @@ export default function PostList({
 	const [loadedPosts, setLoadedPosts] = useState(posts);
 	const [loadedPage, setLoadedPage] = useState(currentPage);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [loadError, setLoadError] = useState<string | null>(null);
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const isFetchingRef = useRef(false);
+	const activeFilterKey = `${searchParams.get("search") ?? ""}\u0000${searchParams.get("category") ?? ""}`;
+	const activeFilterKeyRef = useRef(activeFilterKey);
+	activeFilterKeyRef.current = activeFilterKey;
 
 	useEffect(() => {
 		setLoadedPosts(posts);
 		setLoadedPage(currentPage);
+		setLoadError(null);
+		setIsLoadingMore(false);
+		isFetchingRef.current = false;
 	}, [currentPage, posts]);
 
 	useEffect(() => {
@@ -82,37 +89,64 @@ export default function PostList({
 		router.push(pathname);
 	};
 
-	const loadMorePosts = useCallback(async () => {
-		// An observer can fire again before state updates, so keep a synchronous guard.
-		if (isFetchingRef.current || loadedPage >= totalPages) return;
+	const loadMorePosts = useCallback(
+		async (isRetry = false) => {
+			// An observer can fire again before state updates, so keep a synchronous guard.
+			if (
+				isFetchingRef.current ||
+				loadedPage >= totalPages ||
+				(loadError && !isRetry)
+			) {
+				return;
+			}
 
-		isFetchingRef.current = true;
-		setIsLoadingMore(true);
-		try {
-			const query = {
-				categoryId: Number(searchParams.get("category")) || undefined,
-				page: loadedPage + 1,
-				search: searchParams.get("search") ?? "",
-			};
-			const result =
-				mode === "favorites"
-					? await getFavoritePosts(query)
-					: await getPosts(query);
-			setLoadedPosts((current) => {
-				const knownIds = new Set(current.map((post) => post.id));
-				return [
-					...current,
-					...result.posts.filter((post) => !knownIds.has(post.id)),
-				];
-			});
-			setLoadedPage(result.currentPage);
-		} finally {
-			isFetchingRef.current = false;
-			setIsLoadingMore(false);
-		}
-	}, [loadedPage, mode, searchParams, totalPages]);
+			const requestFilterKey = activeFilterKey;
+			isFetchingRef.current = true;
+			setIsLoadingMore(true);
+			setLoadError(null);
+			try {
+				const category = searchParams.get("category");
+				const query = {
+					categoryId:
+						category && /^[1-9]\d*$/.test(category)
+							? Number(category)
+							: undefined,
+					page: loadedPage + 1,
+					search: searchParams.get("search") ?? "",
+				};
+				const result =
+					mode === "favorites"
+						? await getFavoritePosts(query)
+						: await getPosts(query);
+				if (requestFilterKey !== activeFilterKeyRef.current) return;
 
-	useInfiniteScroll(loadMoreRef, loadMorePosts);
+				setLoadedPosts((current) => {
+					const knownIds = new Set(current.map((post) => post.id));
+					return [
+						...current,
+						...result.posts.filter((post) => !knownIds.has(post.id)),
+					];
+				});
+				setLoadedPage(result.currentPage);
+			} catch {
+				if (requestFilterKey === activeFilterKeyRef.current) {
+					setLoadError("More posts could not be loaded. Please try again.");
+				}
+			} finally {
+				if (requestFilterKey === activeFilterKeyRef.current) {
+					isFetchingRef.current = false;
+					setIsLoadingMore(false);
+				}
+			}
+		},
+		[activeFilterKey, loadError, loadedPage, mode, searchParams, totalPages],
+	);
+
+	const observeNextPage = useCallback(() => {
+		void loadMorePosts();
+	}, [loadMorePosts]);
+
+	useInfiniteScroll(loadMoreRef, observeNextPage);
 
 	return (
 		<>
@@ -180,12 +214,26 @@ export default function PostList({
 					ref={loadMoreRef}
 					aria-live="polite"
 				>
-					{isLoadingMore && (
+					{loadError ? (
+						<div
+							className="flex flex-wrap items-center justify-center gap-3"
+							role="alert"
+						>
+							<span className="text-sm text-destructive">{loadError}</span>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => void loadMorePosts(true)}
+							>
+								Retry
+							</Button>
+						</div>
+					) : isLoadingMore ? (
 						<div className="flex items-center gap-2 text-muted-foreground">
 							<Spinner className="size-10" />
 							<span className="sr-only">Loading more posts</span>
 						</div>
-					)}
+					) : null}
 				</div>
 			)}
 		</>
