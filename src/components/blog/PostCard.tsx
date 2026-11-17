@@ -4,21 +4,10 @@ import { Calendar, Tag } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-export interface PostCardData {
-	id: number;
-	title: string;
-	content?: string;
-	createdAt: Date | string;
-	categoryIds?: number[];
-	category?: {
-		id: number;
-		name: string;
-	}[];
-}
+import type { BlogPostListItem } from "@/types/blog";
 
 interface PostCardProps {
-	post: PostCardData;
+	post: BlogPostListItem;
 }
 
 export default function PostCard({ post }: Readonly<PostCardProps>) {

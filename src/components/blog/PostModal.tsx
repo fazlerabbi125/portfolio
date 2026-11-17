@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { createPost, updatePost } from "@/actions/blog";
+import { createPost, updatePost } from "@/actions/blog.action";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -14,6 +14,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/toast";
 import { type PostInput, postSchema } from "@/schemas/blog.schema";
 
 interface Category {
@@ -98,6 +99,7 @@ export default function PostModal({
 			: await createPost(formattedValues);
 
 		if (result.ok) {
+			toast.add({ type: "success", description: result.message });
 			onOpenChange(false);
 			reset();
 			router.refresh();

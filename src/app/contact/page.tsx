@@ -1,5 +1,6 @@
 import ContactForm from "@/components/contact/ContactForm";
 
+/** Renders the public contact page. */
 export default function ContactPage() {
 	return (
 		<>

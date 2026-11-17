@@ -27,7 +27,7 @@ async function main() {
 
 	const { posts: source } = responseSchema.parse(res.data);
 
-	const candidates = source.map((p, i) => {
+	const candidates = source.map((p) => {
 		return {
 			title: p.title,
 			content: p.body,

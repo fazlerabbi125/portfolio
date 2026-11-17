@@ -5,7 +5,7 @@ import { cn } from "cn";
 import { Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { sendEmail } from "@/actions/contact/sendEmail";
+import { sendEmail } from "@/actions/contact.action";
 import { Button } from "@/components/ui/button";
 import contactSchema from "@/schemas/contact.schema";
 import "./ContactForm.css";

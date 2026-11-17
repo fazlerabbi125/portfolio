@@ -5,7 +5,11 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { createCategory, deleteCategory, updateCategory } from "@/actions/blog";
+import {
+	createCategory,
+	deleteCategory,
+	updateCategory,
+} from "@/actions/blog.action";
 import DeleteConfirmDialog from "@/components/blog/DeleteConfirmDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +19,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/toast";
 import { type CategoryInput, categorySchema } from "@/schemas/blog.schema";
 
 interface Category {
@@ -52,7 +57,6 @@ export default function CategoryModal({
 		register,
 		handleSubmit,
 		reset,
-		watch,
 		formState: { errors },
 	} = useForm<CategoryInput>({
 		resolver: zodResolver(categorySchema),
@@ -79,35 +83,52 @@ export default function CategoryModal({
 		setIsSubmitting(true);
 		setMessage(null);
 
-		const result = editingCategory
-			? await updateCategory(editingCategory.id, values)
-			: await createCategory(values);
+		try {
+			const result = editingCategory
+				? await updateCategory(editingCategory.id, values)
+				: await createCategory(values);
 
-		setIsSubmitting(false);
-
-		if (result.ok) {
-			setMessage({ text: result.message, ok: true });
-			reset(emptyCategory);
-			setEditingCategory(null);
-			reset(emptyCategory);
-			watch("name");
-		} else {
-			setMessage({ text: result.message, ok: false });
+			if (result.ok) {
+				toast.add({ type: "success", description: result.message });
+				reset(emptyCategory);
+				setEditingCategory(null);
+				router.refresh();
+			} else {
+				setMessage({ text: result.message, ok: false });
+			}
+		} catch {
+			setMessage({
+				text: "Category changes could not be saved. Please try again.",
+				ok: false,
+			});
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
 	const handleDelete = async () => {
 		if (!deletingCategory) return;
 		setIsSubmitting(true);
-		const result = await deleteCategory(deletingCategory.id);
-		setIsSubmitting(false);
-		setDeletingCategory(null);
+		setMessage(null);
 
-		if (result.ok) {
-			setMessage({ text: result.message, ok: true });
-			router.refresh();
-		} else {
-			setMessage({ text: result.message, ok: false });
+		try {
+			const result = await deleteCategory(deletingCategory.id);
+			if (result.ok) {
+				setDeletingCategory(null);
+				toast.add({ type: "success", description: result.message });
+				router.refresh();
+			} else {
+				setDeletingCategory(null);
+				setMessage({ text: result.message, ok: false });
+			}
+		} catch {
+			setDeletingCategory(null);
+			setMessage({
+				text: "Category could not be deleted. Please try again.",
+				ok: false,
+			});
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 

@@ -21,6 +21,8 @@
 }
 
 .app-header__inner {
+	container-name: header;
+	container-type: inline-size;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -93,7 +95,7 @@
 	gap: 1rem;
 }
 
-@media (min-width: 920px) {
+@container header (min-width: 57.5rem) {
 	.app-header__nav {
 		display: flex;
 	}

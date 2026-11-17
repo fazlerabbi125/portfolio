@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getCategories, getPostById, isPostFavorited } from "@/actions/blog";
+import {
+	getCategories,
+	getPostById,
+	isPostFavorited,
+} from "@/actions/blog.action";
 import PostDetailView from "@/components/blog/PostDetailView";
 import { getCurrentUser } from "@/lib/session";
 
@@ -17,6 +21,7 @@ const appURL = process.env.NEXT_PUBLIC_APP_URL
 	? new URL(process.env.NEXT_PUBLIC_APP_URL)
 	: undefined;
 
+/** Generates metadata for a blog post. */
 export async function generateMetadata({
 	params,
 }: BlogPostPageProps): Promise<Metadata> {
@@ -60,6 +65,7 @@ export async function generateMetadata({
 	};
 }
 
+/** Renders a single blog post. */
 export default async function BlogPostPage({
 	params,
 }: Readonly<BlogPostPageProps>) {

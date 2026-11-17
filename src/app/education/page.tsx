@@ -1,16 +1,19 @@
 import { ExternalLink } from "lucide-react";
+import ScrollReveal from "@/components/common/ScrollReveal";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import education from "@/data/education.json";
 
+/** Renders qualifications in an accessible chronological timeline. */
 export default function EducationPage() {
 	return (
 		<section className="px-4 tablet:px-6 desktop:px-8 mx-auto w-[95%] min-w-[320px]">
 			<h1 className="page-title text-center">Education</h1>
-			<div className="timeline mt-5 mb-[4.5rem] flex flex-col gap-5">
+			<ScrollReveal className="timeline mt-5 mb-[4.5rem] flex flex-col gap-5">
 				{education.map((entry) => (
 					<Card
 						className="timeline-item w-full min-w-0 max-w-[1420px] flex-none gap-0 p-0"
 						data-date={entry.period}
+						data-reveal-item
 						key={entry.title}
 					>
 						<CardContent className="space-y-3 p-6">
@@ -53,7 +56,7 @@ export default function EducationPage() {
 						</CardContent>
 					</Card>
 				))}
-			</div>
+			</ScrollReveal>
 		</section>
 	);
 }

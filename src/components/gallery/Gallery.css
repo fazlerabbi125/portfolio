@@ -3,7 +3,7 @@
 	grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 270px));
 	justify-content: center;
 	gap: 1.25rem;
-	margin-block: 2.5rem;
+	margin-block: 3rem;
 }
 
 .gallery-grid__item {
@@ -16,14 +16,22 @@
 	text-align: left;
 }
 
+@supports (animation-timeline: view()) {
+	.gallery-grid__item {
+		animation: gallery-card-reveal linear both;
+		animation-range: entry 0% cover 40%;
+		animation-timeline: view();
+	}
+}
+
 .gallery-grid__item .portfolio-card {
 	height: 100%;
-	transition: transform 180ms ease;
+	transition: transform 180ms ease-out;
 }
 
 .gallery-grid__item:hover .portfolio-card,
 .gallery-grid__item:focus-visible .portfolio-card {
-	transform: translateY(-3px);
+	transform: scale(1.02);
 }
 
 .gallery-grid__item img {
@@ -36,6 +44,18 @@
 .gallery-grid__item > span {
 	display: block;
 	padding: 0.75rem 1rem;
+}
+
+@keyframes gallery-card-reveal {
+	from {
+		opacity: 0;
+		transform: translateY(1rem);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .picture-modal__title {
@@ -64,13 +84,13 @@
 	flex-direction: column;
 	gap: 5rem;
 	align-items: center;
-	padding-inline: 1.25rem;
+	padding-inline: clamp(0px, calc(100dvw - 30rem), 1.25rem);
 	margin-bottom: 5rem;
 }
 
 .video-display-card {
 	position: relative;
-	width: clamp(350px, 100%, 800px);
+	width: min(100%, 800px);
 	padding-top: 0;
 	padding-bottom: 1rem;
 }
@@ -81,12 +101,12 @@
 	grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 300px));
 	justify-content: center;
 	gap: 1.25rem;
-	padding-inline: 1.25rem;
+	padding-inline: clamp(0px, calc(100dvw - 30rem), 1.25rem);
 }
 
 .video-display-playlist button {
-	--playlist-btn-bg: #182033;
-	--playlist-btn-color: #fff;
+	--playlist-btn-bg: var(--foreground);
+	--playlist-btn-color: var(--background);
 	display: grid;
 	grid-template-columns: 30px minmax(0, 1fr);
 	grid-template-rows: auto auto;
@@ -104,10 +124,12 @@
 
 	&:hover:not(:disabled) {
 		--playlist-btn-bg: var(--tertiary);
+		--playlist-btn-color: var(--tertiary-foreground);
 	}
 
 	&:disabled:not(:hover) {
-		--playlist-btn-bg: var(--muted);
+		--playlist-btn-bg: var(--hover);
+		--playlist-btn-color: var(--muted-foreground);
 		opacity: 0.75;
 	}
 }
@@ -135,11 +157,4 @@
 	font-size: 0.875rem;
 	line-height: 1.25;
 	text-align: left;
-}
-
-.gallery-load-more {
-	display: flex;
-	justify-content: center;
-	margin: 2rem 0 1rem;
-	padding-top: 0;
 }

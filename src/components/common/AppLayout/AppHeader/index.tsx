@@ -1,9 +1,21 @@
 "use client";
 
-import { Heart, Home, LogOut, Menu, User as UserIcon, X } from "lucide-react";
+import {
+	Heart,
+	Home,
+	KeyRound,
+	LogOut,
+	Menu,
+	PencilLine,
+	User as UserIcon,
+	X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { logout } from "@/actions/auth";
+import { useState } from "react";
+import { logout } from "@/actions/auth.action";
+import AccountSettingsDialog from "@/components/common/AccountSettingsDialog";
+import ThemeToggle from "@/components/common/ThemeToggle";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -24,7 +36,7 @@ import {
 	navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { NAVIGATION_LINKS, USER_ROLES } from "@/lib/constants";
-import type { SessionData } from "@/lib/session";
+import type { CurrentAccount } from "@/queries/account.query";
 import "./AppHeader.css";
 
 const navLinkValues = Object.values(NAVIGATION_LINKS);
@@ -40,13 +52,15 @@ function isActivePath(pathname: string, route: string) {
 }
 
 interface AppHeaderProps {
-	currentUser: SessionData | null;
+	currentUser: CurrentAccount | null;
 }
 
 export default function AppHeader({ currentUser }: Readonly<AppHeaderProps>) {
 	const pathname = usePathname();
 	const isHome = pathname === "/";
 	const isGalleryActive = pathname.startsWith("/gallery/");
+	const [profileOpen, setProfileOpen] = useState(false);
+	const [passwordOpen, setPasswordOpen] = useState(false);
 
 	return (
 		<header className="app-header">
@@ -143,6 +157,7 @@ export default function AppHeader({ currentUser }: Readonly<AppHeaderProps>) {
 				)}
 
 				<div className="app-header__actions">
+					<ThemeToggle />
 					{!isHome && (
 						<DropdownMenu>
 							<DropdownMenuTrigger
@@ -227,52 +242,77 @@ export default function AppHeader({ currentUser }: Readonly<AppHeaderProps>) {
 					)}
 
 					{currentUser && (
-						<DropdownMenu>
-							<DropdownMenuTrigger
-								className="user-avatar"
-								aria-label={`Account menu for ${currentUser.name}`}
-							>
-								<UserIcon size={22} />
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								align="end"
-								className="nav-dropdown__content"
-							>
-								{currentUser.role === USER_ROLES.USER && (
+						<>
+							<DropdownMenu>
+								<DropdownMenuTrigger
+									className="user-avatar"
+									aria-label={`Account menu for ${currentUser.name}`}
+								>
+									<UserIcon size={22} />
+								</DropdownMenuTrigger>
+								<DropdownMenuContent
+									align="end"
+									className="nav-dropdown__content"
+								>
+									{currentUser.role === USER_ROLES.USER && (
+										<DropdownMenuItem
+											render={
+												<Link
+													href="/blog/favorites"
+													aria-current={
+														pathname === "/blog/favorites" ? "page" : undefined
+													}
+												/>
+											}
+										>
+											<Heart size={15} />
+											Favorites
+										</DropdownMenuItem>
+									)}
+									{currentUser.role === USER_ROLES.USER && (
+										<DropdownMenuSeparator />
+									)}
 									<DropdownMenuItem
+										className="cursor-pointer"
+										onClick={() => setProfileOpen(true)}
+									>
+										<PencilLine size={15} />
+										Update profile
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										className="cursor-pointer"
+										onClick={() => setPasswordOpen(true)}
+									>
+										<KeyRound size={15} />
+										Change password
+									</DropdownMenuItem>
+									<DropdownMenuSeparator />
+									<form action={logout} id="header-logout" />
+									<DropdownMenuItem
+										variant="destructive"
 										render={
-											<Link
-												href="/blog/favorites"
-												aria-current={
-													pathname === "/blog/favorites" ? "page" : undefined
-												}
+											<button
+												type="submit"
+												form="header-logout"
+												className="w-full text-left font-normal"
 											/>
 										}
+										nativeButton
 									>
-										<Heart size={15} />
-										Favorites
+										<LogOut size={15} />
+										Logout
 									</DropdownMenuItem>
-								)}
-								{currentUser.role === USER_ROLES.USER && (
-									<DropdownMenuSeparator />
-								)}
-								<form action={logout} id="header-logout" />
-								<DropdownMenuItem
-									variant="destructive"
-									render={
-										<button
-											type="submit"
-											form="header-logout"
-											className="w-full text-left font-normal"
-										/>
-									}
-									nativeButton
-								>
-									<LogOut size={15} />
-									Logout
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+								</DropdownMenuContent>
+							</DropdownMenu>
+							<AccountSettingsDialog
+								name={currentUser.name}
+								email={currentUser.email}
+								profileOpen={profileOpen}
+								passwordOpen={passwordOpen}
+								onProfileOpenChange={setProfileOpen}
+								onPasswordOpenChange={setPasswordOpen}
+							/>
+						</>
 					)}
 				</div>
 			</div>
